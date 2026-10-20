@@ -1,0 +1,4 @@
+interface:
+  display_name: "Новая игра для 0-player"
+  short_description: "Новые игры, ИИ и интеграция с движком 0-player"
+  default_prompt: "Используй $create-zero-player-game, чтобы добавить новую игру в 0-player с ИИ, ручным управлением и сохранениями."

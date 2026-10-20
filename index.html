@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#141714" />
+    <meta
+      name="description"
+      content="A tiny arcade that plays itself. Watch Snake and Tetris think, or take over any time. Offline and zero players required."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23141714'/%3E%3Cpath d='M8 8h16v16H8z' fill='none' stroke='%23c6ef83' stroke-width='4'/%3E%3C/svg%3E"
+    />
+    <title>0-player — The self-playing arcade</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#game-canvas">Skip to game</a>
+    <div class="app">
+      <header class="topbar" id="topbar">
+        <button
+          class="wordmark"
+          id="home-button"
+          aria-label="Open game library"
+        >
+          <span class="logo" aria-hidden="true">0</span
+          ><span class="wordmark-name">0-player</span
+          ><span class="version">/ 001</span>
+        </button>
+        <span class="header-divider" aria-hidden="true"></span>
+        <button
+          class="game-switcher"
+          id="library-button"
+          aria-haspopup="dialog"
+          aria-controls="library-dialog"
+        >
+          <span id="game-picker-icon" data-icon="snake"></span
+          ><span id="game-picker-title">Snake</span
+          ><span data-icon="chevron"></span><kbd>G</kbd>
+        </button>
+        <span class="tagline">No players required.</span>
+        <div class="header-actions">
+          <button class="icon-button" id="settings-button" aria-label="Game settings" title="Game settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span data-icon="settings"></span></button>
+          <button
+            class="quiet-button"
+            id="controls-button"
+            aria-haspopup="dialog"
+            aria-controls="controls-dialog"
+            title="Controls · ?"
+          >
+            <span data-icon="keyboard"></span
+            ><span class="button-label">Controls</span><kbd>?</kbd></button
+          ><button
+            class="icon-button"
+            id="focus-button"
+            aria-label="Focus mode"
+            title="Focus mode · F"
+          >
+            <span data-icon="expand"></span>
+          </button>
+        </div>
+      </header>
+      <main id="arcade" class="workspace">
+        <aside class="controls-rail" aria-label="Game controls">
+          <p class="rail-title">Your controls</p>
+          <div id="inline-controls" class="rail-controls"></div>
+          <div class="rail-runtime" aria-label="Arcade shortcuts">
+            <button data-command="auto"><kbd>A</kbd><span>Autopilot</span></button>
+            <button data-command="pause"><kbd>Space / P</kbd><span>Pause</span></button>
+            <button data-command="restart"><kbd>R</kbd><span>Restart</span></button>
+            <button data-command="focus"><kbd>F</kbd><span>Focus</span></button>
+            <button data-command="games"><kbd>G</kbd><span>Games</span></button>
+            <button data-command="help"><kbd>/</kbd><span>All controls</span></button>
+          </div>
+          <p class="rail-note">English or Russian keyboard.<br />Your game saves as you play.</p>
+        </aside>
+        <section class="play-area" aria-label="Game screen">
+          <div class="stage-bar">
+            <div class="stage-title">
+              <h1 id="game-title">Snake</h1>
+              <p id="game-description"></p>
+            </div>
+            <div class="compact-stats">
+              <span>Score <strong id="compact-score">000</strong></span
+              ><span>Best <strong id="compact-best">000</strong></span
+              ><small id="compact-metrics"></small>
+            </div>
+            <span class="stage-note">A mind of its own.</span>
+          </div>
+          <div class="stage-center" id="stage-center">
+            <div class="screen" id="screen">
+              <div class="screen-top">
+                <span id="screen-label">SNAKE / 24 × 24</span
+                ><span class="live-label"
+                  ><span class="live-dot"></span
+                  ><span id="screen-status">AUTOPILOT</span></span
+                >
+              </div>
+              <div class="canvas-wrap">
+                <canvas
+                  id="game-canvas"
+                  width="480"
+                  height="480"
+                  tabindex="0"
+                  aria-label="Snake game board. Arrow keys take control, A for autopilot, Space or P to pause."
+                  >Your browser needs Canvas 2D to play.</canvas
+                >
+                <div class="board-overlay" id="board-overlay" hidden>
+                  <p id="overlay-title">Paused</p>
+                  <span id="overlay-note">Press Space or P to keep going</span
+                  ><button id="overlay-button" class="primary-button" hidden>
+                    Play again ↵
+                  </button>
+                </div>
+              </div>
+              <div class="screen-bottom">
+                <span id="board-caption">A mind of its own.</span
+                ><span id="round-label">ROUND 001</span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="touch-controls"
+            id="touch-controls"
+            aria-label="Touch game controls"
+          ></div>
+        </section>
+        <aside class="game-info" aria-label="Game details">
+          <p class="eyebrow" id="game-number">GAME 01</p>
+          <div class="score-panel">
+            <span class="detail-label">Score</span
+            ><span class="score" id="score">000</span>
+            <div class="best-row">
+              <span>Best run</span><span id="best">000</span>
+            </div>
+          </div>
+          <div class="metrics" id="metrics"></div>
+          <section class="focus-controls-rail" aria-label="Manual controls" id="focus-controls-rail" inert>
+            <p class="rail-title">Your controls</p>
+            <div id="focus-game-controls" class="rail-controls"></div>
+            <button class="rail-auto" data-command="auto"><kbd>A</kbd> Let AI play</button>
+            <p class="rail-note">AI rescues after a loss<br /><kbd>R</kbd> restart · <kbd>Space</kbd> pause</p>
+          </section>
+          <section class="pilot-panel">
+            <div class="pilot-heading">
+              <span class="pilot-symbol" data-icon="spark"></span>
+              <h2 id="pilot-title">Autopilot is on</h2>
+              <span class="on-label" id="pilot-state">ON</span>
+            </div>
+            <p id="strategy"></p>
+            <p class="handoff-note">
+              Arrow keys take over.<br /><kbd>A</kbd> brings
+              AI back.
+            </p>
+          </section>
+          <div class="aside-note">
+            <span class="footer-dot"></span>Built small. Plays forever.<span
+              class="aside-hint"
+              ><kbd>G</kbd> games <span>·</span> <kbd>?</kbd> controls</span
+            >
+          </div>
+          <nav class="focus-hint" aria-label="Focus mode controls">
+            <button
+              id="focus-library"
+              aria-label="Choose game"
+              title="Choose game · G"
+            >
+              <span data-icon="grid"></span></button
+            ><button
+              id="focus-controls"
+              aria-label="Show controls"
+              title="Controls · ?"
+            >
+              <span data-icon="keyboard"></span></button
+            ><button id="focus-auto">
+              <span id="focus-control-label">Take control</span
+              ><kbd id="focus-control-key" hidden>A</kbd></button
+            ><button id="focus-pause" aria-label="Pause or resume" title="Pause · Space / P">
+              <span data-icon="pause"></span></button
+            ><button id="focus-exit" aria-label="Exit focus" title="Exit focus · F">Exit <kbd>F</kbd></button>
+          </nav>
+        </aside>
+      </main>
+      <footer class="transport" aria-label="Playback controls">
+        <div class="transport-actions">
+          <button
+            id="pause-button"
+            class="icon-button"
+            aria-label="Pause"
+            title="Pause · Space / P"
+          >
+            <span data-icon="pause"></span></button
+          ><button
+            id="restart-button"
+            class="quiet-button"
+            aria-label="Restart game"
+            title="Restart · R"
+          >
+            <span data-icon="restart"></span><span class="button-label">Restart</span>
+          </button>
+        </div>
+        <span class="control-divider"></span
+        ><button id="control-button" class="primary-button">
+          <span data-icon="gamepad"></span
+          ><span id="control-label">Take control</span
+          ><kbd id="control-key">↑</kbd>
+        </button>
+        <div class="dock-spacer"></div>
+        <div class="speed-control" role="group" aria-label="Game speed">
+          <span class="speed-label">Speed</span
+          ><span class="speed-options"><button data-speed="0.5" aria-pressed="false">½×</button
+          ><button data-speed="1" aria-pressed="true">1×</button
+          ><button data-speed="2" aria-pressed="false">2×</button
+          ><button data-speed="4" aria-pressed="false">4×</button></span>
+        </div>
+        <select id="speed-select" aria-label="Game speed">
+          <option value="0.5">½×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option></select
+        ><button
+          class="quiet-button new-seed"
+          id="seed-button"
+          title="New seed"
+        >
+          <span data-icon="shuffle"></span
+          ><span class="button-label">New seed</span>
+        </button>
+      </footer>
+    </div>
+    <dialog
+      id="library-dialog"
+      class="library-dialog"
+      aria-labelledby="library-title"
+    >
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">THE COLLECTION</p>
+          <h2 id="library-title">Your arcade.</h2>
+        </div>
+        <button
+          class="icon-button"
+          data-close-panel
+          aria-label="Close game library"
+        >
+          <span data-icon="close"></span>
+        </button>
+      </div>
+      <p class="dialog-description">
+        Pick a game. Watch it think, or make your move.
+      </p>
+      <label class="search-field"
+        ><span data-icon="search"></span
+        ><input
+          id="game-search"
+          type="search"
+          placeholder="Find a game…"
+          aria-label="Search games"
+          autocomplete="off"
+          spellcheck="false"
+        /><kbd>Esc</kbd></label
+      >
+      <div class="library-meta">
+        <span id="library-count">2 games</span
+        ><span>Arrows to choose · Enter or 1–9 to play</span>
+      </div>
+      <div id="game-list" class="game-grid"></div>
+      <div class="dialog-footnote">
+        Open anytime with <kbd>G</kbd>. Your current game waits here.
+      </div>
+    </dialog>
+    <dialog
+      id="controls-dialog"
+      class="controls-dialog"
+      aria-labelledby="controls-heading"
+    >
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">YOUR CONTROLS</p>
+          <h2 id="controls-heading">Game controls</h2>
+        </div>
+        <button
+          class="icon-button"
+          data-close-panel
+          aria-label="Close controls"
+        >
+          <span data-icon="close"></span>
+        </button>
+      </div>
+      <p class="dialog-description">
+        Press a key, or click an action to jump in.
+      </p>
+      <div class="control-layout" id="game-controls"></div>
+      <div class="runtime-hints" aria-label="Arcade controls">
+        <span><kbd>A</kbd> Autopilot</span
+        ><span><kbd>Space / P</kbd> Pause</span><span><kbd>R</kbd> Restart</span
+        ><span><kbd>F</kbd> Focus</span><span><kbd>G</kbd> Games</span
+        ><span><kbd>/ / ?</kbd> Controls</span>
+      </div>
+      <p class="restart-hint">
+        After a loss, rewind and let AI take over. <kbd>R</kbd> starts fresh.
+      </p>
+      <div class="sheet-actions">
+        <button id="seed-button-extra" class="quiet-button">
+          <span data-icon="shuffle"></span>New seed</button
+        ><button class="quiet-button" data-close-panel>
+          Back to game <span data-icon="arrow"></span>
+        </button>
+      </div>
+    </dialog>
+    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-heading">
+      <div class="dialog-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settings-heading">Snake settings</h2></div><button class="icon-button" data-close-panel aria-label="Close settings"><span data-icon="close"></span></button></div>
+      <div id="settings-root"></div>
+    </dialog>
+    <p class="sr-only" role="status" id="announcement"></p>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

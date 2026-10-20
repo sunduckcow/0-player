@@ -1,0 +1,47 @@
+/* Utilities only: keep the arcade's existing reset and terminal palette. */
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities";
+@source "./components";
+@source "./settings-ui.tsx";
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: #e5e8df;
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--bg);
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: #e5e8df;
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--muted);
+  --color-accent: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --color-accent-foreground: var(--accent);
+  --color-destructive: #f3a6ab;
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--accent);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+.settings-form {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-form [data-slot="toggle-group"] {
+  flex-wrap: wrap;
+}
+
+.settings-form [data-slot="toggle-group-item"] {
+  min-height: 44px;
+}
+
+.settings-form [data-slot="input"] {
+  min-height: 44px;
+}
+
+.settings-form [data-slot="button"] {
+  min-height: 44px;
+}
