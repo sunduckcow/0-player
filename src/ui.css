@@ -17,6 +17,8 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-interface);
+  --font-mono: var(--font-interface);
   --color-background: var(--bg);
   --color-foreground: var(--text);
   --color-primary: var(--accent);
@@ -111,7 +113,7 @@
 .settings-section-heading { margin-bottom: 24px; }
 .settings-section-heading h3 {
   margin: 0 0 8px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: inherit;
   font-size: 23px;
   font-weight: 500;
   line-height: 1.2;

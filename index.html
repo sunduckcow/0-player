@@ -23,7 +23,8 @@
           id="home-button"
           aria-label="Open game library"
         >
-          <span class="logo" aria-hidden="true">0</span
+          <span class="logo" aria-hidden="true"><span>0</span></span
+          ><span class="wordmark-dash" aria-hidden="true">—</span
           ><span class="wordmark-name">player</span
           ><span class="version">/ 001</span>
         </button>
@@ -76,16 +77,11 @@
         </aside>
         <section class="play-area" aria-label="Game screen">
           <div class="stage-bar">
-            <div class="stage-title">
-              <h1 id="game-title">Snake</h1>
-              <p id="game-description"></p>
-            </div>
             <div class="compact-stats">
               <span>Score <strong id="compact-score">000</strong></span
               ><span>Best <strong id="compact-best">000</strong></span
               ><small id="compact-metrics"></small>
             </div>
-            <span class="stage-note">A mind of its own.</span>
           </div>
           <div class="stage-center" id="stage-center">
             <div class="screen" id="screen">
@@ -219,15 +215,8 @@
           <option value="0.5">½×</option>
           <option value="1" selected>1×</option>
           <option value="2">2×</option>
-          <option value="4">4×</option></select
-        ><button
-          class="quiet-button new-seed"
-          id="seed-button"
-          title="New seed"
-        >
-          <span data-icon="shuffle"></span
-          ><span class="button-label">New seed</span>
-        </button>
+          <option value="4">4×</option>
+        </select>
       </footer>
     </div>
     <dialog
@@ -304,9 +293,7 @@
         After a loss, rewind and let AI take over. <kbd>R</kbd> starts fresh.
       </p>
       <div class="sheet-actions">
-        <button id="seed-button-extra" class="quiet-button">
-          <span data-icon="shuffle"></span>New seed</button
-        ><button class="quiet-button" data-close-panel>
+        <button class="quiet-button" data-close-panel>
           Back to game <span data-icon="arrow"></span>
         </button>
       </div>

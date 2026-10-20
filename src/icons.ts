@@ -1,6 +1,6 @@
 import {
   ArrowRight, Blocks, ChevronDown, Expand, Gamepad2, Grid2x2,
-  Keyboard, Pause, Play, RotateCcw, Search, Settings2, Shuffle,
+  Keyboard, Pause, Play, RotateCcw, Search, Settings2,
   Sparkles, X, createElement, type IconNode,
 } from "lucide";
 
@@ -10,7 +10,7 @@ const snakeMark: IconNode = [["path", {
 
 const icons = {
   expand: Expand, pause: Pause, play: Play, restart: RotateCcw,
-  shuffle: Shuffle, snake: snakeMark, blocks: Blocks, spark: Sparkles,
+  snake: snakeMark, blocks: Blocks, spark: Sparkles,
   gamepad: Gamepad2, chevron: ChevronDown, keyboard: Keyboard,
   search: Search, close: X, grid: Grid2x2, arrow: ArrowRight,
   settings: Settings2,

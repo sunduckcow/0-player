@@ -174,13 +174,11 @@ function setGame(id: string, seed?: number) {
     "aria-label",
     `${game.title} game board. Arrow keys take control, A for autopilot, Space or P to pause.`,
   );
-  text("game-title", game.title);
   text("game-picker-title", game.title);
   element("game-picker-icon").innerHTML = icon(
     game.id === "snake" ? "snake" : game.id === "tetris" ? "blocks" : "gamepad",
   );
   text("game-number", `GAME 0${catalog.indexOf(game) + 1}`);
-  text("game-description", game.description);
   text("controls-heading", `${game.title} controls`);
   for (const id of ["game-controls", "inline-controls", "focus-game-controls"]) {
     renderControlLayout(element(id), id === "game-controls" ? element("touch-controls") : null, game.controls, (action) => {
@@ -495,16 +493,6 @@ element("focus-button").addEventListener("click", () => dispatch("focus"));
 element("focus-exit").addEventListener("click", () => dispatch("focus"));
 element("focus-auto").addEventListener("click", toggleController);
 element("focus-pause").addEventListener("click", () => dispatch("pause"));
-function newSeed() {
-  panels.close();
-  saveBest();
-  active.session.restart(freshSeed());
-  persistGame();
-  syncUrl();
-  updateHud();
-}
-element("seed-button").addEventListener("click", newSeed);
-element("seed-button-extra").addEventListener("click", newSeed);
 function toggleController() {
   if (active.session.recovering) return;
   if (active.session.mode === "human") dispatch("auto");
