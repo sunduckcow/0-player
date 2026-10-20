@@ -58,7 +58,7 @@ works in that case.
 ## Manual speed handoff
 
 - Tests cover ½×/2×/4× to manual 1× and back, with the original board and timing preserved. Pause, restart, snapshots and legacy snapshots preserve the remembered autopilot preference.
-- Browser verified keyboard and button takeover, manual reload at 1× with `?speed=4`, and AI restoration to 4×. Changing speed updates the query immediately. Switching games restored separate 1×/½× preferences instead of overwriting them with the prior game query.
+- Speed is now one shared engine preference in `0-player:speed`. Each game supplies `tickMs`; engine tests verify ½×/1×/2×/4× against different base ticks. Old speed query parameters are ignored and removed. Manual takeover stays at 1×; AI resumes the shared multiplier. Game switches and fresh seeds keep the preference.
 
 
 ## Loss recovery

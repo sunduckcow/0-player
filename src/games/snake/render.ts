@@ -1,4 +1,4 @@
-import { clear, grid, palette } from "@/engine/draw";
+import { clear, grid, palette, lightPalette } from "@/engine/draw";
 import { recoveryIntensity } from "@/engine/feedback";
 import type { RenderFrame } from "@/engine/types";
 import { vectors, type SnakeState } from "./game";
@@ -31,7 +31,7 @@ export function renderSnake(
   }
   ctx.save();
   ctx.globalAlpha = recoveryIntensity(frame);
-  ctx.fillStyle = frame.recovery ? "#ef8585" : palette.body;
+  ctx.fillStyle = frame.recovery ? lightPalette ? "#ac2b2b" : "#ef8585" : palette.body;
   for (let i = state.body.length - 1; i >= 0; i--) {
     const segment = state.body[i]!;
     const next = state.body[i - 1];
@@ -69,7 +69,7 @@ export function renderSnake(
   const y = head.y * cell;
   ctx.save();
   ctx.globalAlpha = recoveryIntensity(frame);
-  ctx.fillStyle = frame.recovery ? "#ffb5aa" : palette.accent;
+  ctx.fillStyle = frame.recovery ? lightPalette ? "#8e201d" : "#ffb5aa" : palette.accent;
   ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
   ctx.fillStyle = palette.background;
   const forward = vectors[state.direction];

@@ -9,6 +9,15 @@ export const palette = {
   ghost: "#344330",
 };
 
+export type DrawPalette = typeof palette;
+export let lightPalette = false;
+
+/** Presentation state only: changing a theme never changes a game state. */
+export function setPalette(next: DrawPalette, light: boolean) {
+  Object.assign(palette, next);
+  lightPalette = light;
+}
+
 export function clear(
   ctx: CanvasRenderingContext2D,
   width: number,

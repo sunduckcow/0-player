@@ -9,15 +9,30 @@ bunx --bun shadcn@latest add @shadcn/button @shadcn/input @shadcn/toggle-group @
 Additional components can be installed with `bun run ui:add @shadcn/<name>`. `components.json` defines the source paths and Lucide icon library. Keep local variant changes when updating generated components.
 
 ```ts
-import { renderSettings, type SnakeSettings } from '@/settings-ui';
+import { renderSettings, type SettingsValues } from '@/settings-ui';
 
-const dispose = renderSettings(container, settings, (next: SnakeSettings) => {
+const dispose = renderSettings(container, {
+  gameId: 'tetris',
+  general: { theme: 'dark', accent: 'lime' },
+  snake: { ai: 'explorer', columns: 24, rows: 24 },
+  tetris: { showGhost: true, showNext: true },
+}, (next: SettingsValues) => {
   // Host applies options, persists them, and closes its native dialog.
 });
 // Dispose before rendering another form into this container.
 dispose();
 ```
 
-`SnakeSettings` contains `ai: 'explorer' | 'safe'`, `columns`, and `rows`. The form validates even dimensions from 8 to 40. Presets are S 12×12, M 24×24, and L 32×32. Applying an AI change should preserve the current board; changing dimensions should start a new round. The host owns the dialog, pause state, saving, and game lifecycle.
+The dialog opens to General. A vertical tab list switches between General and the current game; below 560px it becomes horizontal with matching keyboard orientation. Drafts survive tab changes. Apply saves the draft; Cancel, Escape and closing discard it. The footer stays visible while long content scrolls. The host owns pause restoration and focus.
 
-`src/ui.css` includes Tailwind utilities without Preflight, so existing page geometry is unaffected. Semantic colors map to the arcade's existing tokens. Lucide uses named imports in `src/icons.ts`; Vite includes only icons used by the shell.
+General supports dark/light/system and an accent selector with lime/cyan/violet/amber/rose presets plus a custom HEX color. `AppearancePreferences` stores the preset name (or `custom`) and optional `customColor`. `appearance.ts` validates preferences and derives all shared interface/Canvas colors from the selected accent, adjusting contrast for the resolved theme. Snake's food takes the complementary hue, 180° from the accent. Tetris retains distinct colors for its seven pieces. The host persists `0-player:appearance` and observes system theme changes. Appearance changes preserve the existing session.
+
+`SnakeSettings` contains `ai: 'explorer' | 'safe'`, `columns`, and `rows`. Dimensions must be even, 8…40; presets are S 12×12, M 24×24 and L 32×32. An AI change preserves the board; a resize starts a fresh board. Tetris supports landing-guide and next-piece visibility. Its cartridge rebinds presentation around the same Session, retaining RNG, pause, speed and rewind history. `rebindPresentation` rejects different rule functions.
+
+Tabs was also installed with `bun run ui:add @shadcn/tabs`. Its wrapper forwards Base UI's `orientation` and uses `data-orientation` selectors.
+
+The accent dropdown uses the official shadcn `select`, installed with `bun run ui:add @shadcn/select`. Each option and the selected value show a color swatch. Its popup stays within the host dialog's top layer. Custom mode offers a color picker and a validated six-digit HEX input; invalid drafts cannot be applied.
+
+`src/ui.css` imports Tailwind theme/utilities without Preflight and adds a small layered form-control reset. Keep reset declarations below utilities in cascade priority; unlayered `button {color:inherit}` would override primary-button contrast. Semantic colors use `index.css` tokens. Lucide uses named imports, and Vite includes only icons used by the app.
+
+`Game.labels` describes static HTML labels in logical board coordinates. `board-labels.ts` positions and sizes them with the Canvas; renderers draw the pixel artwork. Tetris uses this for the sharp **Next** label and hides it with the preview.

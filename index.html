@@ -40,16 +40,16 @@
         </button>
         <span class="tagline">No players required.</span>
         <div class="header-actions">
-          <button class="icon-button" id="settings-button" aria-label="Game settings" title="Game settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span data-icon="settings"></span></button>
+          <button class="icon-button" id="settings-button" aria-label="Settings" title="Settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span data-icon="settings"></span></button>
           <button
-            class="quiet-button"
+            class="icon-button"
             id="controls-button"
+            aria-label="Controls"
             aria-haspopup="dialog"
             aria-controls="controls-dialog"
-            title="Controls · ?"
+            title="Controls · /"
           >
-            <span data-icon="keyboard"></span
-            ><span class="button-label">Controls</span><kbd>?</kbd></button
+            <span data-icon="keyboard"></span></button
           ><button
             class="icon-button"
             id="focus-button"
@@ -105,6 +105,7 @@
                   aria-label="Snake game board. Arrow keys take control, A for autopilot, Space or P to pause."
                   >Your browser needs Canvas 2D to play.</canvas
                 >
+                <div class="board-labels" id="board-labels"></div>
                 <div class="board-overlay" id="board-overlay" hidden>
                   <p id="overlay-title">Paused</p>
                   <span id="overlay-note">Press Space or P to keep going</span
@@ -172,6 +173,7 @@
               title="Controls · ?"
             >
               <span data-icon="keyboard"></span></button
+            ><button id="focus-settings" aria-label="Settings" title="Settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span data-icon="settings"></span></button
             ><button id="focus-auto">
               <span id="focus-control-label">Take control</span
               ><kbd id="focus-control-key" hidden>A</kbd></button
@@ -310,7 +312,7 @@
       </div>
     </dialog>
     <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-heading">
-      <div class="dialog-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settings-heading">Snake settings</h2></div><button class="icon-button" data-close-panel aria-label="Close settings"><span data-icon="close"></span></button></div>
+      <div class="dialog-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settings-heading">Settings</h2></div><button class="icon-button" data-close-panel aria-label="Close settings"><span data-icon="close"></span></button></div>
       <div id="settings-root"></div>
     </dialog>
     <p class="sr-only" role="status" id="announcement"></p>

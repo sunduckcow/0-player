@@ -21,6 +21,13 @@ export interface RenderFrame {
   paused: boolean;
   recovery?: { progress: number; steps: number };
 }
+/** HTML text placed in logical board coordinates, independent of pixel art. */
+export interface BoardLabel {
+  text: string;
+  x: number;
+  y: number;
+  size?: number;
+}
 export interface Game<S extends GameState> {
   id: string;
   title: string;
@@ -30,6 +37,7 @@ export interface Game<S extends GameState> {
   width: number;
   height: number;
   tickMs: number;
+  labels?: readonly BoardLabel[];
   recovery?: {
     steps: number;
     durationMs?: number;

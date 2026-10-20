@@ -1,5 +1,5 @@
 import "@/index.css";
-import { catalog, configureSnake } from "@/catalog";
+import { catalog, configureSnake, configureTetris } from "@/catalog";
 import { listenKeyboard, type Command } from "@/engine/input";
 import { hydrateIcons, icon } from "@/icons";
 import { renderControlLayout } from "@/control-layout";
@@ -9,7 +9,10 @@ import { createLibraryNavigation, gameShortcut } from "@/library-navigation";
 import { normalizeSnakeOptions, type SnakeOptions } from "@/games/snake";
 import { loadSession, saveSession, readPreference, writePreference } from "@/storage";
 import { renderSettings } from "@/settings-ui";
-import type { SessionSnapshot } from "@/engine/session";
+import { playbackSpeeds, type SessionSnapshot } from "@/engine/session";
+import { normalizeTetrisOptions } from "@/games/tetris/settings";
+import { applyAppearance, defaultAppearance, normalizeAppearance } from "@/appearance";
+import { renderBoardLabels, resizeBoardLabels } from "@/board-labels";
 
 const element = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -23,15 +26,22 @@ const context = canvas.getContext("2d", { alpha: false });
 if (!context) throw new Error("This browser needs Canvas 2D to run 0-player.");
 const ctx = context;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const systemTheme = matchMedia("(prefers-color-scheme: dark)");
+let appearance = normalizeAppearance(readPreference("appearance", defaultAppearance));
+applyAppearance(appearance, systemTheme.matches);
+systemTheme.addEventListener("change", () => applyAppearance(appearance, systemTheme.matches));
 
 const freshSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
 const storedOptions = readPreference<Partial<SnakeOptions> | null>("settings:snake", {});
 let snakeOptions = normalizeSnakeOptions(storedOptions ?? {});
 configureSnake(snakeOptions);
+let tetrisOptions = normalizeTetrisOptions(readPreference("settings:tetris", null));
+configureTetris(tetrisOptions);
+const storedSpeed = readPreference<unknown>("speed", 1);
+let playbackSpeed: number = playbackSpeeds.find((speed) => speed === storedSpeed) ?? 1;
 
 const params = new URLSearchParams(location.hash.slice(1));
 const query = new URLSearchParams(location.search);
-const initialSpeed = Number(query.get("speed"));
 // Shared links enter the focus layout without requiring browser fullscreen permission.
 document.body.classList.toggle(
   "focus-mode",
@@ -143,21 +153,22 @@ function persistGame() {
   if (snapshot.seed !== active.session.seed) syncUrl(snapshot.seed);
 }
 
-function setGame(id: string, seed?: number, requestedSpeed?: number) {
+function setGame(id: string, seed?: number) {
   persistGame();
   game = catalog.find((item) => item.id === id) ?? catalog[0];
   active = game.start(seed ?? freshSeed());
   const saved = savedSessions.get(game.id) ?? loadSession(game.id);
   const sizeMatches = game.id !== "snake" || (saved && "columns" in saved.state && "rows" in saved.state && saved.state.columns === snakeOptions.columns && saved.state.rows === snakeOptions.rows);
   if (saved && sizeMatches && (seed === undefined || saved.seed === seed)) active.restore(saved);
-  // An explicit speed in a shared link takes precedence over saved preferences.
-  if (requestedSpeed !== undefined) active.session.setSpeed(requestedSpeed);
+  // Playback is a shared engine preference, independent of the saved game's board.
+  active.session.setSpeed(playbackSpeed);
   initialized = true;
   best = savedBest = readBest();
   lastTime = 0;
   metricsKey = "";
   canvas.width = game.width;
   canvas.height = game.height;
+  renderBoardLabels(element("board-labels"), game.labels ?? [], game);
   fitScreen();
   canvas.setAttribute(
     "aria-label",
@@ -171,7 +182,6 @@ function setGame(id: string, seed?: number, requestedSpeed?: number) {
   text("game-number", `GAME 0${catalog.indexOf(game) + 1}`);
   text("game-description", game.description);
   text("controls-heading", `${game.title} controls`);
-  element("settings-button").hidden = game.id !== "snake";
   for (const id of ["game-controls", "inline-controls", "focus-game-controls"]) {
     renderControlLayout(element(id), id === "game-controls" ? element("touch-controls") : null, game.controls, (action) => {
       panels.close();
@@ -191,7 +201,7 @@ function setGame(id: string, seed?: number, requestedSpeed?: number) {
 function syncUrl(seed = active.session.seed) {
   // URL fragments work for file:// distribution and subpath hosting alike.
   const url = new URL(location.href);
-  url.searchParams.set("speed", String(active.session.autoSpeed));
+  url.searchParams.delete("speed");
   url.hash = `game=${game.id}&seed=${seed}`;
   try {
     history.replaceState(null, "", url);
@@ -215,29 +225,48 @@ function showFocusHint() {
 }
 
 function openSettings() {
-  if (game.id !== "snake") return;
   if (panels.current === settingsDialog) { panels.close(); return; }
   disposeSettings?.();
-  disposeSettings = renderSettings(element("settings-root"), snakeOptions, (options) => {
-    const next = normalizeSnakeOptions(options);
-    const resized = next.columns !== snakeOptions.columns || next.rows !== snakeOptions.rows;
+  disposeSettings = renderSettings(element("settings-root"), {
+    gameId: game.id === "snake" ? "snake" : "tetris",
+    general: appearance, snake: snakeOptions, tetris: tetrisOptions,
+  }, (options) => {
+    const nextSnake = normalizeSnakeOptions(options.snake);
+    const nextTetris = normalizeTetrisOptions(options.tetris);
+    const resized = nextSnake.columns !== snakeOptions.columns || nextSnake.rows !== snakeOptions.rows;
+    const snakeChanged = resized || nextSnake.ai !== snakeOptions.ai;
+    const tetrisChanged = nextTetris.showGhost !== tetrisOptions.showGhost || nextTetris.showNext !== tetrisOptions.showNext;
     panels.close();
     persistGame();
     const snapshot = active.session.snapshot();
-    snakeOptions = next;
-    writePreference("settings:snake", next);
-    configureSnake(next);
-    // A different board starts a round; changing the AI keeps every cell.
-    game = catalog[0];
-    active = game.start(snapshot.seed);
-    if (!resized) active.restore(snapshot);
-    else { active.session.mode = snapshot.mode; active.session.setSpeed(snapshot.autoSpeed ?? snapshot.speed); }
-    initialized = false;
-    savedSessions.set(game.id, active.session.snapshot());
-    saveSession(game.id, active.session.snapshot());
-    setGame(game.id, active.session.seed);
+    appearance = normalizeAppearance(options.general);
+    writePreference("appearance", appearance);
+    applyAppearance(appearance, systemTheme.matches);
+    snakeOptions = nextSnake;
+    tetrisOptions = nextTetris;
+    writePreference("settings:snake", snakeOptions);
+    writePreference("settings:tetris", tetrisOptions);
+    if (snakeChanged) configureSnake(snakeOptions);
+    if (tetrisChanged) configureTetris(tetrisOptions);
+    if (game.id === "snake" && snakeChanged) {
+      // A different board starts a round; changing the AI keeps every cell.
+      game = catalog[0];
+      active = game.start(snapshot.seed);
+      if (!resized) active.restore(snapshot);
+      else { active.session.mode = snapshot.mode; active.session.setSpeed(snapshot.autoSpeed ?? snapshot.speed); }
+      initialized = false;
+      savedSessions.set(game.id, active.session.snapshot());
+      saveSession(game.id, active.session.snapshot());
+      setGame(game.id, active.session.seed);
+    } else if (game.id === "tetris" && tetrisChanged) {
+      game = catalog[1];
+      active = game.rebindPresentation(active);
+      renderBoardLabels(element("board-labels"), game.labels ?? [], game);
+    }
+    fitScreen();
+    updateHud();
     persistGame();
-    announce(resized ? "New board ready." : "AI changed. Your board continues.");
+    announce(game.id === "snake" && resized ? "New board ready." : "Settings saved. Your board continues.");
   });
   panels.toggle(settingsDialog);
 }
@@ -285,7 +314,7 @@ function dispatch(command: Command) {
       panels.toggle(controlsDialog);
       break;
     case "auto":
-      session.automate();
+      session.automate(!reducedMotion.matches);
       announce(
         session.state.over
           ? "Autopilot will start a new round."
@@ -425,6 +454,7 @@ element("controls-button").addEventListener("click", () =>
   panels.toggle(controlsDialog),
 );
 element("settings-button").addEventListener("click", openSettings);
+element("focus-settings").addEventListener("click", openSettings);
 document.querySelectorAll<HTMLButtonElement>("[data-command]").forEach(button => button.addEventListener("click", () => dispatch(button.dataset.command as Command)));
 element("focus-controls").addEventListener("click", () =>
   panels.toggle(controlsDialog),
@@ -443,20 +473,20 @@ search.addEventListener("keydown", (event) => {
 element<HTMLSelectElement>("speed-select").addEventListener(
   "change",
   (event) => {
-    active.session.setSpeed(Number((event.target as HTMLSelectElement).value));
-    syncUrl();
-    persistGame();
-    updateHud();
+    setPlaybackSpeed(Number((event.target as HTMLSelectElement).value));
   },
 );
 document.querySelectorAll<HTMLButtonElement>("[data-speed]").forEach((button) =>
-  button.addEventListener("click", () => {
-    active.session.setSpeed(Number(button.dataset.speed));
-    syncUrl();
-    persistGame();
-    updateHud();
-  }),
+  button.addEventListener("click", () => setPlaybackSpeed(Number(button.dataset.speed))),
 );
+function setPlaybackSpeed(speed: number) {
+  if (!playbackSpeeds.some((value) => value === speed)) return;
+  playbackSpeed = speed;
+  writePreference("speed", speed);
+  active.session.setSpeed(speed, !reducedMotion.matches);
+  persistGame();
+  updateHud();
+}
 element("pause-button").addEventListener("click", () => dispatch("pause"));
 element("restart-button").addEventListener("click", () => dispatch("restart"));
 element("overlay-button").addEventListener("click", () => dispatch("restart"));
@@ -529,11 +559,12 @@ function fitScreen() {
   const width = Math.max(0, Math.floor(Math.min(available.width - horizontal, (available.height - vertical) * ratio)));
   screen.style.width = `${width + horizontal}px`;
   screen.style.height = `${Math.floor(width / ratio) + vertical}px`;
+  resizeBoardLabels(element("board-labels"), width / game.width);
 }
 const resize = new ResizeObserver(fitScreen);
 resize.observe(element("stage-center"));
 
-setGame(initialGame.id, seedParam !== null ? initialSeed : undefined, initialSpeed);
+setGame(initialGame.id, seedParam !== null ? initialSeed : undefined);
 showFocusHint();
 function frame(time: number) {
   if (!document.hidden) {

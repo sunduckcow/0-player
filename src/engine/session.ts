@@ -1,6 +1,11 @@
 import type { Action, Game, GameState, Mode } from "@/engine/types";
 import { nextSeed } from "@/engine/random";
 
+export const playbackSpeeds = [0.5, 1, 2, 4] as const;
+const speedTransitionMs = 350;
+const easing = (time: number) => time * time * (3 - 2 * time);
+const easingIntegral = (time: number) => time ** 3 - time ** 4 / 2;
+
 export interface SessionSnapshot<S extends GameState = GameState> {
   state: S;
   mode: Mode;
@@ -22,6 +27,8 @@ export class Session<S extends GameState> {
   seed: number;
   private queue: Action[] = [];
   private elapsed = 0;
+  private playbackRate = 1;
+  private speedTransition: { from: number; elapsed: number } | undefined;
   private endedFor = 0;
   private readonly rewindSteps: number;
   private readonly historyLimit: number;
@@ -47,6 +54,11 @@ export class Session<S extends GameState> {
 
   get speed() {
     return this.mode === "human" ? 1 : this.autoSpeed;
+  }
+
+  /** Presentation rate; saves and UI selections use the discrete speed target. */
+  get playbackSpeed() {
+    return this.mode === "human" ? 1 : this.playbackRate;
   }
 
   constructor(game: Game<S>, seed: number) {
@@ -81,6 +93,7 @@ export class Session<S extends GameState> {
     this.endedFor = 0;
     this.clearRecovery();
     this.resetClock();
+    this.finishSpeedTransition();
   }
 
   input(action: Action) {
@@ -97,14 +110,19 @@ export class Session<S extends GameState> {
   takeControl() {
     if (this.recovering || this.mode === "human") return;
     this.mode = "human";
+    this.finishSpeedTransition();
     this.rescueAttempts = 0;
     this.resetClock();
   }
 
-  automate() {
-    if (this.mode === "human") this.resetClock();
+  automate(smooth = false) {
+    const wasHuman = this.mode === "human";
+    if (wasHuman) this.resetClock();
     this.mode = "auto";
     this.queue = [];
+    if (wasHuman && smooth && this.autoSpeed !== 1)
+      this.speedTransition = { from: 1, elapsed: 0 };
+    else if (wasHuman || !smooth) this.finishSpeedTransition();
   }
 
   togglePause() {
@@ -112,10 +130,38 @@ export class Session<S extends GameState> {
     this.resetClock();
   }
 
-  setSpeed(speed: number) {
-    if (![0.5, 1, 2, 4].includes(speed)) return;
+  setSpeed(speed: number, smooth = false) {
+    if (!playbackSpeeds.some((value) => value === speed)) return;
+    if (smooth && speed === this.autoSpeed) return;
+    const from = this.playbackSpeed;
     this.autoSpeed = speed;
-    this.resetClock();
+    if (smooth && this.mode === "auto" && from !== speed)
+      this.speedTransition = { from, elapsed: 0 };
+    else {
+      this.finishSpeedTransition();
+      if (!smooth) this.resetClock();
+    }
+  }
+
+  private finishSpeedTransition() {
+    this.speedTransition = undefined;
+    this.playbackRate = this.speed;
+  }
+
+  private playbackTime(delta: number, animate: boolean): number {
+    if (!animate || this.mode === "human") this.finishSpeedTransition();
+    const transition = this.speedTransition;
+    if (!transition) return delta * this.playbackSpeed;
+    const start = transition.elapsed / speedTransitionMs;
+    const duration = Math.min(delta, speedTransitionMs - transition.elapsed);
+    transition.elapsed += duration;
+    const end = transition.elapsed / speedTransitionMs;
+    const difference = this.autoSpeed - transition.from;
+    const elapsed = duration * transition.from + difference * speedTransitionMs *
+      (easingIntegral(end) - easingIntegral(start));
+    this.playbackRate = transition.from + difference * easing(end);
+    if (end === 1) this.finishSpeedTransition();
+    return elapsed + (delta - duration) * this.autoSpeed;
   }
 
   resetClock() {
@@ -131,6 +177,7 @@ export class Session<S extends GameState> {
     this.paused = false;
     this.clearRecovery();
     this.resetClock();
+    this.finishSpeedTransition();
   }
 
   private clearRecovery() {
@@ -204,6 +251,7 @@ export class Session<S extends GameState> {
   }
 
   advance(delta: number, animateRecovery = true) {
+    this.finishSpeedTransition();
     this.advanceClock(delta, animateRecovery, 8);
   }
 
@@ -226,10 +274,13 @@ export class Session<S extends GameState> {
       }
       return;
     }
-    const step = this.game.tickMs / this.speed;
+    const step = this.game.tickMs;
+    const elapsed = tickLimit === 1
+      ? this.playbackTime(delta, animateRecovery)
+      : delta * this.speed;
     this.elapsed = tickLimit === 1
-      ? this.elapsed + delta
-      : Math.min(this.elapsed + delta, step * 8);
+      ? this.elapsed + elapsed
+      : Math.min(this.elapsed + elapsed, step * 8);
     let ticks = 0;
     while (this.elapsed >= step && ticks < tickLimit) {
       ticks++;

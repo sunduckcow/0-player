@@ -1,7 +1,8 @@
-import { clear, grid, palette } from "@/engine/draw";
+import { clear, grid, palette, lightPalette } from "@/engine/draw";
 import { recoveryIntensity } from "@/engine/feedback";
 import type { RenderFrame } from "@/engine/types";
 import { clearFrame, type ClearEffect } from "./clear-effect";
+import { defaultTetrisOptions, type TetrisOptions } from "./settings";
 import {
   cells,
   dropY,
@@ -25,6 +26,8 @@ const colors = [
   "#d7a0f7", // T — violet
   "#f38fa5", // Z — pink
 ];
+const lightColors = ["#087f89", "#4365c3", "#ae5b18", "#92720d", "#337e30", "#8e45b8", "#b33c60"];
+const pieceColor = (index: number) => (lightPalette ? lightColors : colors)[index]!;
 
 function block(
   ctx: CanvasRenderingContext2D,
@@ -45,7 +48,7 @@ function drawPiece(ctx: CanvasRenderingContext2D, piece: Piece, ghost = false, c
   for (const [x, y] of cells(piece)) {
     if (y < 0) continue;
     if (ghost) {
-      ctx.strokeStyle = colors[kinds.indexOf(piece.kind)]! + "66";
+      ctx.strokeStyle = pieceColor(kinds.indexOf(piece.kind)) + (lightPalette ? "99" : "66");
       ctx.strokeRect(
         X + x * CELL + 3.5,
         Y + y * CELL + 3.5,
@@ -58,12 +61,12 @@ function drawPiece(ctx: CanvasRenderingContext2D, piece: Piece, ghost = false, c
         X + x * CELL,
         Y + y * CELL,
         CELL,
-        color ?? colors[kinds.indexOf(piece.kind)]!,
+        color ?? pieceColor(kinds.indexOf(piece.kind)),
       );
   }
 }
 
-export function render(ctx: CanvasRenderingContext2D, state: TetrisState, frame: RenderFrame) {
+export function render(ctx: CanvasRenderingContext2D, state: TetrisState, frame: RenderFrame, options: TetrisOptions = defaultTetrisOptions) {
   let effect = effects.get(ctx);
   if (!effect) { effect = {}; effects.set(ctx, effect); }
   if (frame.recovery) {
@@ -73,6 +76,7 @@ export function render(ctx: CanvasRenderingContext2D, state: TetrisState, frame:
   }
   const flash = frame.recovery ? null : clearFrame(effect, state, frame.time, reducedMotion?.matches);
   const board = flash?.board ?? state.board;
+  const recoveryColor = lightPalette ? "#9b6517" : "#efc584";
   clear(ctx, viewport.width, viewport.height);
   ctx.fillStyle = palette.grid;
   ctx.fillRect(X - 1, Y - 1, CELL * 10 + 2, CELL * 20 + 2);
@@ -85,41 +89,42 @@ export function render(ctx: CanvasRenderingContext2D, state: TetrisState, frame:
     for (let x = 0; x < 10; x++) {
       const value = board[y]![x]!;
       if (value)
-        block(ctx, X + x * CELL, Y + y * CELL, CELL, frame.recovery ? "#efc584" : colors[value - 1]!);
+        block(ctx, X + x * CELL, Y + y * CELL, CELL, frame.recovery ? recoveryColor : pieceColor(value - 1));
     }
   }
   ctx.restore();
   if (flash) {
-    ctx.fillStyle = `rgba(235,255,210,${flash.opacity})`;
+    ctx.save();
+    ctx.fillStyle = lightPalette ? palette.accent : "#ebffd2";
+    ctx.globalAlpha = flash.opacity;
     for (const y of flash.rows) ctx.fillRect(X, Y + y * CELL + 1, CELL * 10, CELL - 2);
+    ctx.restore();
   }
   if (!state.over) {
-    if (!frame.recovery) drawPiece(
+    if (!frame.recovery && options.showGhost) drawPiece(
       ctx,
       { ...state.piece, y: dropY(state.board, state.piece) },
       true,
     );
     ctx.save();
     ctx.globalAlpha = recoveryIntensity(frame);
-    drawPiece(ctx, state.piece, false, frame.recovery ? "#efc584" : undefined);
+    drawPiece(ctx, state.piece, false, frame.recovery ? recoveryColor : undefined);
     ctx.restore();
   }
+  if (!options.showNext) return;
   const next = state.bag[0]!;
   const preview = cells({ kind: next, x: 0, y: 0, rotation: 0 });
   const minX = Math.min(...preview.map(([x]) => x));
   const minY = Math.min(...preview.map(([, y]) => y));
   const maxX = Math.max(...preview.map(([x]) => x));
   const previewX = 304 - (maxX - minX + 1) * 8;
-  ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, monospace";
-  ctx.fillStyle = palette.muted;
-  ctx.fillText("Next", 276, 41);
   for (const [x, y] of preview) {
     block(
       ctx,
       previewX + (x - minX) * 16,
       58 + (y - minY) * 16,
       16,
-      colors[kinds.indexOf(next)]!,
+      pieceColor(kinds.indexOf(next)),
     );
   }
 }

@@ -3,8 +3,11 @@ import { ai } from "@/games/tetris/ai";
 import { create, update, type TetrisState } from "@/games/tetris/game";
 import { render, viewport } from "@/games/tetris/render";
 import { canContinue } from "@/games/recovery";
+import { normalizeTetrisOptions, type TetrisOptions } from "./settings";
 
-export const tetris: Game<TetrisState> = {
+export function createTetrisGame(options: Partial<TetrisOptions> = {}): Game<TetrisState> {
+  const settings = normalizeTetrisOptions(options);
+  return {
   id: "tetris",
   title: "Tetris",
   description: "Seven shapes. Keep the stack low and the rows complete.",
@@ -34,6 +37,7 @@ export const tetris: Game<TetrisState> = {
   ],
   ...viewport,
   tickMs: 80,
+  labels: settings.showNext ? [{ text: "Next", x: 276, y: 29, size: 12 }] : [],
   create,
   update,
   ai,
@@ -42,12 +46,15 @@ export const tetris: Game<TetrisState> = {
     durationMs: 720,
     canResume: (state) => canContinue(state, ai, update, 48),
   },
-  render,
+  render: (ctx, state, frame) => render(ctx, state, frame, settings),
   metrics: (state) => [
     { label: "Lines", value: state.lines },
     { label: "Level", value: state.level },
     { label: "Pieces", value: state.pieces },
   ],
-};
+  };
+}
+
+export const tetris = createTetrisGame();
 
 export type { TetrisState } from "@/games/tetris/game";

@@ -13,7 +13,7 @@ bun install
 bun run dev
 ```
 
-Open the local address printed by Vite. `bun run check` runs lint, TypeScript and Vitest; `bun run build` produces **one self-contained `dist/index.html`** (roughly 397 KB, or 124 KB gzip). Open it directly offline, send it to someone, or upload it to any static host. `bun run preview` serves the production build locally.
+Open the local address printed by Vite. `bun run check` runs lint, TypeScript and Vitest; `bun run build` produces **one self-contained `dist/index.html`** (roughly 544 KB, or 170 KB gzip). Open it directly offline, send it to someone, or upload it to any static host. `bun run preview` serves the production build locally.
 
 For GitHub Pages, publish the contents of `dist/` as the site's root or a repository subdirectory. All code, styles and the favicon are inline, so no base-path configuration is needed. Nothing is published by the build command.
 
@@ -63,7 +63,7 @@ See GitHub's [custom Pages workflow documentation](https://docs.github.com/en/pa
 
 Letter shortcuts follow physical key positions, so they also work with the Russian layout: for example G/П opens the library and A/Ф returns control to AI. Touch devices get a directional pad and game actions. Focus mode has touch-accessible takeover, pause and exit controls. Browser shortcuts and form controls keep their normal behavior. New games start with autopilot enabled; it restarts completed rounds automatically. Snake and Tetris recover from losses automatically. Returning to AI preserves the board and pause state.
 
-Choose an autopilot speed between ½× and 4×. Shared links use a readable query parameter, for example `?fullscreen=1&speed=4#game=snake`. Manual takeover always runs at 1×; returning to AI restores its chosen speed. The URL keeps the autopilot speed while manual control is active. Speed controls are disabled during manual play, and each game remembers its own autopilot preference. An explicit `speed` in a link overrides the saved preference on initial load. Each game's board, score, AI/manual mode, pause state, speed, seed and round are saved locally about once a second, when switching games and when leaving the page. Switching games and reloading continue the saved session. Settings and best scores are also saved per game. If storage is unavailable, switching still preserves sessions in memory for the current page.
+Browser speed changes and returning to autopilot ease in and out over 350 ms, preserving tick progress. Reduced motion uses immediate transitions. Local saves keep the selected target speed. Choose an autopilot speed between ½× and 4×. Shared links keep the game, seed and focus layout, for example `?fullscreen=1#game=snake&seed=42`; one shared speed preference stays in local storage (`0-player:speed`). Each game supplies its base `tickMs`; the engine applies the same ½×/1×/2×/4× multiplier across all games. Manual takeover always runs at 1×; returning to AI restores its chosen speed. Speed controls are disabled during manual play, and all games use the same autopilot preference. Old `speed` query parameters are ignored and removed. Switching games or opening a different seed keeps this browser’s shared speed preference. Each game's board, score, AI/manual mode, pause state, speed, seed and round are saved locally about once a second, when switching games and when leaving the page. Switching games and reloading continue the saved session. Settings and best scores are also saved per game. If storage is unavailable, switching still preserves sessions in memory for the current page.
 
 The **Restart** button, R, a manual retry and automatic new rounds all choose a new seed. Round seeds are mixed to avoid the similar first draws of neighboring LCG seeds; **New seed** also samples browser randomness. The URL fragment stores the selected game and current seed, for example `#game=tetris&seed=42`. An explicit seed opens its matching saved session when available; otherwise it starts that setup. The same seed, settings, actions and control-ownership sequence produce the same state. Engine callers can replay a setup with `session.restart(seed)`. This is not an input recording system.
 
@@ -76,11 +76,13 @@ focus layout. F and the focus buttons update this query parameter, preserving
 the selected game, seed and other parameters. Opening a link uses the focus
 layout; native browser fullscreen still needs a user gesture.
 
-The arcade fits the viewport without page scrolling. The header and dock keep fixed heights; waiting or taking control does not resize the board. In the normal desktop layout, game controls sit on the left, the game fills the center, and score and details sit on the right. Focus mode keeps the game with a compact score, selected metrics and playback controls on the right, freeing the full height for the board. Taking control reveals the game's key hints; returning to autopilot hides them while keeping the board in place. Smaller screens use compact stats and touch controls.
+The arcade fits the viewport without page scrolling. The header and dock keep fixed heights; waiting or taking control does not resize the board. In the normal desktop layout, game controls sit on the left, the game fills the center, and score and details sit on the right. The header shows a controls icon only when the left rail is hidden (up to 1000px); `/` and `?` always open the full control sheet. Focus mode keeps the game with a compact score, selected metrics and playback controls on the right, freeing the full height for the board. Taking control reveals the game's key hints; returning to autopilot hides them while keeping the board in place. Smaller screens use compact stats and touch controls.
 
 Open the searchable game library with **G** or the current-game selector. Compact cards form a grid; arrows work from the search field, Enter plays the active result, and 1–9 select the catalog's numbered games. Open the configured control sheet with **/** or **?**. Escape closes the panel and returns to the board. Panels pause gameplay and restore its previous pause state. Selecting either game continues its saved board.
 
-Snake's **Game settings** button offers Explorer or Safe loop AI and S (12×12), M (24×24), L (32×32), or custom even dimensions from 8 to 40 in each direction. Switching AI continues the current board. Changing dimensions starts a new board.
+**Settings** is available in both games, including focus mode. Its General section offers dark, light or system appearance and an accent selector with five presets or a custom HEX color. The accent generates the interface backgrounds, panels, buttons, borders and board palette; contrast adapts to the theme. Snake's apple uses the opposite hue on the color wheel. System appearance tracks your device theme. Preferences are saved in this browser; Apply saves the draft and Cancel discards it. Appearance changes preserve the live session. Navigation moves above the form on small screens.
+
+Snake settings offer Explorer or Safe loop AI and S (12×12), M (24×24), L (32×32), or custom even dimensions from 8 to 40 in each direction. Switching AI continues the current board. Changing dimensions starts a new board. Tetris settings show or hide the landing guide and next-piece preview, preserving the same session and rewind history. Board labels such as **Next** are HTML text in logical coordinates, so text remains sharp while the Canvas keeps its pixel art.
 
 Explorer hunts food while leaving room around the moving tail. For the final ten empty cells, it looks for a complete route through those cells back to the tail and chooses the shortest food prefix. Meals entering that range must preserve such a route, avoiding the isolated-cell traps that a simple tail-following check can miss. The completion search shares an 8192-state budget per decision; moving-tail food search shares 32 endpoint checks. A previously saved, already impossible board cannot always be repaired by a legal move; restart it with R.
 
@@ -105,7 +107,9 @@ src/
   game-library.ts  catalog search and game cards
   library-navigation.ts keyboard selection in the game grid
   control-layout.ts per-game keycaps and touch buttons
-  settings-ui.tsx  shadcn settings form; isolated React root
+  settings-ui.tsx  General and per-game settings; isolated React root
+  appearance.ts   validated theme/accent preferences and shared palette
+  board-labels.ts sharp HTML labels in logical board coordinates
   components/ui/   shadcn component source installed by CLI
   icons.ts         selected Lucide icons
   index.css        interface styling
