@@ -19,10 +19,10 @@ export function createSnakeGame(
         ? "Chases food along short routes, checks each escape, and opens safe paths when space gets tight."
         : "Follows a safe board-wide cycle, taking shortcuts to food. Replans after human play.",
     controls: [
-      { action: "up", keys: ["ArrowUp", "k"], label: "Move up", touch: "↑" },
-      { action: "left", keys: ["ArrowLeft", "h"], label: "Move left", touch: "←" },
-      { action: "down", keys: ["ArrowDown", "j"], label: "Move down", touch: "↓" },
-      { action: "right", keys: ["ArrowRight", "l"], label: "Move right", touch: "→" },
+      { action: "up", keys: ["ArrowUp", "k"], label: "Move up", group: "Move", touch: "↑" },
+      { action: "left", keys: ["ArrowLeft", "h"], label: "Move left", group: "Move", touch: "←" },
+      { action: "down", keys: ["ArrowDown", "j"], label: "Move down", group: "Move", touch: "↓" },
+      { action: "right", keys: ["ArrowRight", "l"], label: "Move right", group: "Move", touch: "→" },
     ],
     width: settings.columns * 20,
     height: settings.rows * 20,
@@ -36,7 +36,7 @@ export function createSnakeGame(
       isLoss: (state) => state.over && !state.won,
       canResume: (state) => canContinue(state, ai, updateSnake, 16, (next) => next.won),
     },
-    render: renderSnake,
+    render: (ctx, state, frame) => renderSnake(ctx, state, frame, settings.skin),
     metrics: (state) => [
       { label: "Length", value: state.body.length },
       {

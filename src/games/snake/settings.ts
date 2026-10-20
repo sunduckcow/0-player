@@ -1,9 +1,11 @@
 export type SnakeStrategy = "explorer" | "safe";
+export type SnakeSkin = "tapered" | "squares";
 
 export interface SnakeOptions {
   ai: SnakeStrategy;
   columns: number;
   rows: number;
+  skin: SnakeSkin;
 }
 
 export const SNAKE_PRESETS = { s: 12, m: 24, l: 32 } as const;
@@ -19,5 +21,6 @@ export function normalizeSnakeOptions(
     ai: options.ai === "safe" ? "safe" : "explorer",
     columns: dimension(options.columns),
     rows: dimension(options.rows),
+    skin: options.skin === "tapered" ? "tapered" : "squares",
   };
 }

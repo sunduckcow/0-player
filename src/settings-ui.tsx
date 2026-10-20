@@ -3,7 +3,9 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { Check, Gamepad2, Monitor, Moon, ShieldCheck, SlidersHorizontal, Sparkles, Sun } from "lucide-react";
 import { accentChoices, resolveAccentColor, type AppearancePreferences } from "@/appearance";
+import type { SnakeSkin } from "@/games/snake/settings";
 import type { TetrisOptions } from "@/games/tetris/settings";
+import { SnakePreview } from "@/snake-preview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +16,7 @@ import "@/ui.css";
 
 export interface SnakeSettings {
   ai: "explorer" | "safe";
+  skin: SnakeSkin;
   columns: number;
   rows: number;
 }
@@ -68,6 +71,7 @@ function SettingsForm({ initial, onApply, onCancel, portalContainer }: {
   const [pickerColor, setPickerColor] = useState(customHex);
   const [tetris, setTetris] = useState(initial.tetris);
   const [ai, setAi] = useState(initial.snake.ai);
+  const [skin, setSkin] = useState(initial.snake.skin);
   const [size, setSize] = useState<Size>(() =>
     (Object.keys(sizes) as (keyof typeof sizes)[]).find(
       (key) => initial.snake.columns === sizes[key] && initial.snake.rows === sizes[key],
@@ -88,7 +92,7 @@ function SettingsForm({ initial, onApply, onCancel, portalContainer }: {
 
   function apply(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (valid) onApply({ general: { ...general, customColor: validColor ? customHex.toLowerCase() : general.customColor }, tetris, snake: { ai, columns: width, rows: height } });
+    if (valid) onApply({ general: { ...general, customColor: validColor ? customHex.toLowerCase() : general.customColor }, tetris, snake: { ai, skin, columns: width, rows: height } });
   }
 
   function changeCustomColor(value: string) {
@@ -132,7 +136,9 @@ function SettingsForm({ initial, onApply, onCancel, portalContainer }: {
                   <SelectTrigger id="appearance-accent" className="settings-select" aria-describedby="appearance-accent-note">
                     <SelectValue><ColorOption label={selectedColor.label} color={selectedColor.color} custom={selectedColor.value === "custom"} /></SelectValue>
                   </SelectTrigger>
-                  <SelectContent container={portalContainer} align="start" alignItemWithTrigger={false} className="settings-accent-menu">
+                  <SelectContent container={portalContainer} side="bottom" align="start" alignItemWithTrigger={false}
+                    positionMethod="fixed" collisionBoundary={[]} collisionPadding={8}
+                    collisionAvoidance={{ side: "none", align: "shift", fallbackAxisSide: "none" }} className="settings-accent-menu">
                     <SelectGroup>
                       {colorOptions.map(({ value, label, color }) => (
                         <SelectItem key={value} value={value}><ColorOption label={label} color={color} custom={value === "custom"} /></SelectItem>
@@ -168,6 +174,21 @@ function SettingsForm({ initial, onApply, onCancel, portalContainer }: {
             </div>
             {initial.gameId === "snake" ? (
               <FieldGroup>
+                <Field>
+                  <FieldTitle id="snake-skin-label">Snake appearance</FieldTitle>
+                  <ToggleGroup className="snake-skin-options" orientation="vertical" aria-labelledby="snake-skin-label" aria-describedby="snake-skin-description" value={[skin]} variant="outline"
+                    onValueChange={(values) => { const next = values[0]; if (next === "tapered" || next === "squares") setSkin(next); }}>
+                    <ToggleGroupItem value="tapered" className="snake-skin-option" aria-label="Tapered snake">
+                      <span>Tapered</span><SnakePreview skin="tapered" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="squares" className="snake-skin-option" aria-label="Square snake">
+                      <span>Squares</span><SnakePreview skin="squares" />
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                  <FieldDescription id="snake-skin-description">
+                    {skin === "tapered" ? "A tapered body with pixel separators." : "Original square tiles with narrow pixel joints."}
+                  </FieldDescription>
+                </Field>
                 <Field>
                   <FieldTitle id="snake-ai-label">Autopilot strategy</FieldTitle>
                   <ToggleGroup aria-labelledby="snake-ai-label" aria-describedby="snake-ai-description" value={[ai]} variant="outline"

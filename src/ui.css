@@ -45,6 +45,9 @@
   padding: 0;
   overflow: hidden;
 }
+/* A transformed dialog would become the fixed popup's containing block. */
+#settings-dialog[open] { animation-name: settings-fade-in; }
+@keyframes settings-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 #settings-dialog .dialog-heading {
   padding: 22px 24px;
@@ -123,6 +126,37 @@
 .settings-form [data-slot="button"] { min-height: 44px; }
 .settings-form [data-slot="toggle-group-item"] { padding-inline: 12px; }
 .settings-form [data-slot="field-description"] { font-size: 11px; line-height: 1.7; }
+.settings-snake-preview {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  aspect-ratio: 8 / 1;
+  image-rendering: pixelated;
+}
+.settings-form [data-slot="toggle-group"].snake-skin-options {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 8px;
+}
+.settings-form [data-slot="toggle-group-item"].snake-skin-option {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 200px);
+  justify-content: space-between;
+  width: 100%;
+  height: 64px;
+  min-height: 64px;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+}
+.settings-form .snake-skin-option[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--hover);
+}
+.snake-skin-option > span { text-align: left; font-size: 11px; }
+.snake-skin-option .settings-snake-preview { max-width: 200px; pointer-events: none; }
 
 .settings-select {
   width: 100%;

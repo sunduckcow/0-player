@@ -187,6 +187,7 @@ describe("Snake cartridges", () => {
     expect(next.over).toBe(false);
   });
 
+  // Thousands of bounded AI decisions need more wall time on shared CI runners.
   it.each([1, 7, 9001])("explores and keeps eating with seed %i", (seed) => {
     const game = createSnakeGame();
     let state = game.create(seed);
@@ -194,7 +195,7 @@ describe("Snake cartridges", () => {
       state = game.update(state, game.ai(state));
     expect(state.over && !state.won).toBe(false);
     expect(state.score).toBeGreaterThan(35);
-  });
+  }, 15_000);
 
   it("keeps independent board settings and deterministic replays", () => {
     const small = createSnakeGame({ columns: 12, rows: 12 });

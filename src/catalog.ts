@@ -3,6 +3,7 @@ import type { Game, GameState } from "@/engine/types";
 import { snake, createSnakeGame, type SnakeOptions } from "@/games/snake";
 import { tetris, createTetrisGame } from "@/games/tetris";
 import type { TetrisOptions } from "@/games/tetris/settings";
+import { normalizeSnakeOptions } from "@/games/snake/settings";
 
 function cartridge<S extends GameState>(game: Game<S>) {
   function present(session: Session<S>) {
@@ -37,9 +38,16 @@ function cartridge<S extends GameState>(game: Game<S>) {
 }
 
 export const catalog = [cartridge(snake), cartridge(tetris)];
+let snakeGame = snake;
+let snakeSettings = normalizeSnakeOptions();
 
 export function configureSnake(options: SnakeOptions) {
-  catalog[0] = cartridge(createSnakeGame(options));
+  const next = normalizeSnakeOptions(options);
+  const game = createSnakeGame(next);
+  const sameRules = next.ai === snakeSettings.ai && next.columns === snakeSettings.columns && next.rows === snakeSettings.rows;
+  snakeGame = sameRules ? { ...snakeGame, render: game.render } : game;
+  snakeSettings = next;
+  catalog[0] = cartridge(snakeGame);
 }
 
 export function configureTetris(options: TetrisOptions) {

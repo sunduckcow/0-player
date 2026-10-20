@@ -234,7 +234,8 @@ function openSettings() {
     const nextSnake = normalizeSnakeOptions(options.snake);
     const nextTetris = normalizeTetrisOptions(options.tetris);
     const resized = nextSnake.columns !== snakeOptions.columns || nextSnake.rows !== snakeOptions.rows;
-    const snakeChanged = resized || nextSnake.ai !== snakeOptions.ai;
+    const snakeRulesChanged = resized || nextSnake.ai !== snakeOptions.ai;
+    const snakeChanged = snakeRulesChanged || nextSnake.skin !== snakeOptions.skin;
     const tetrisChanged = nextTetris.showGhost !== tetrisOptions.showGhost || nextTetris.showNext !== tetrisOptions.showNext;
     panels.close();
     persistGame();
@@ -248,7 +249,7 @@ function openSettings() {
     writePreference("settings:tetris", tetrisOptions);
     if (snakeChanged) configureSnake(snakeOptions);
     if (tetrisChanged) configureTetris(tetrisOptions);
-    if (game.id === "snake" && snakeChanged) {
+    if (game.id === "snake" && snakeRulesChanged) {
       // A different board starts a round; changing the AI keeps every cell.
       game = catalog[0];
       active = game.start(snapshot.seed);
@@ -258,8 +259,8 @@ function openSettings() {
       savedSessions.set(game.id, active.session.snapshot());
       saveSession(game.id, active.session.snapshot());
       setGame(game.id, active.session.seed);
-    } else if (game.id === "tetris" && tetrisChanged) {
-      game = catalog[1];
+    } else if ((game.id === "snake" && snakeChanged) || (game.id === "tetris" && tetrisChanged)) {
+      game = catalog[game.id === "snake" ? 0 : 1];
       active = game.rebindPresentation(active);
       renderBoardLabels(element("board-labels"), game.labels ?? [], game);
     }

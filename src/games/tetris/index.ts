@@ -19,6 +19,7 @@ export function createTetrisGame(options: Partial<TetrisOptions> = {}): Game<Tet
       action: "left",
       keys: ["ArrowLeft", "h"],
       label: "Move left",
+      group: "Move",
       touch: "←",
     },
     {
@@ -31,6 +32,7 @@ export function createTetrisGame(options: Partial<TetrisOptions> = {}): Game<Tet
       action: "right",
       keys: ["ArrowRight", "l"],
       label: "Move right",
+      group: "Move",
       touch: "→",
     },
     { action: "primary", keys: ["Enter"], label: "Hard drop", touch: "Drop" },

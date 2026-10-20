@@ -12,6 +12,8 @@ export interface GameControl {
   action: Action;
   keys: readonly string[];
   label: string;
+  /** Shared compact legend row; keyboard and touch actions stay individual. */
+  group?: string;
   /** Short label for a touch button; omitted controls are keyboard-only. */
   touch?: string;
 }

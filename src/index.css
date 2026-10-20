@@ -41,6 +41,7 @@ kbd { font: inherit; font-size: 10px; color: var(--muted); border: 1px solid var
 .app { display: grid; grid-template-rows: var(--header-height) minmax(0,1fr) var(--dock-height); width: 100%; max-width: 1800px; height: 100vh; height: 100dvh; margin: auto; padding: 0 28px; }
 .topbar { display: flex; align-items: center; gap: 20px; min-width: 0; border-bottom: 1px solid var(--line); }
 .wordmark { display: flex; align-items: center; gap: 10px; flex-shrink: 0; font-size: 21px; font-weight: 650; letter-spacing: -1.2px; padding: 0; min-height: 44px; }
+.wordmark-name { font-family: "Arial Black", Arial, Helvetica, sans-serif; font-size: 26px; font-style: italic; font-weight: 900; font-synthesis: weight style; letter-spacing: -1.5px; line-height: 1; padding-right: 3px; }
 .logo { color: var(--bg); background: var(--accent); font-size: 24px; line-height: 31px; width: 29px; height: 31px; text-align: center; border-radius: 2px; }
 .version { font-size: 9px; font-weight: 400; letter-spacing: 0; color: var(--muted); }
 .header-divider, .control-divider { height: 22px; width: 1px; background: var(--line); flex-shrink: 0; }
@@ -78,10 +79,10 @@ canvas:focus, canvas:focus-visible { outline: none; }
 .controls-rail { padding: 6px 0; }
 .rail-title, .eyebrow { font-size: 9px; color: var(--muted); letter-spacing: 1.3px; margin-bottom: 18px; }
 .rail-controls { display: flex; flex-direction: column; gap: 6px; }
-.rail-controls button.control-hint { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px; min-height: 46px; padding: 8px; border: 1px solid var(--line); background: var(--surface-raised); border-radius: 4px; }
+.rail-controls .control-hint { min-height: 36px; padding: 6px; gap: 6px; }
 .rail-controls .control-keys { gap: 3px; }
-.rail-controls .control-keys kbd { font-size: 9px; padding: 2px 4px; min-width: 18px; }
-.rail-controls .control-description { font-size: 9px; }
+.rail-controls .control-keys kbd { font-size: 9px; padding: 2px 3px; min-width: 18px; }
+.rail-controls .control-description, .rail-controls .control-key-separator { font-size: 9px; }
 .rail-runtime { display: flex; flex-direction: column; gap: 2px; padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--line); }
 .rail-runtime button { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 30px; padding: 4px; font-size: 9px; color: var(--soft); border-radius: 3px; }
 .rail-runtime kbd { font-size: 9px; }
@@ -161,12 +162,13 @@ svg.game-card-art { width: 26px; height: 26px; color: var(--accent); grid-column
 .dialog-footnote { color: var(--muted); font-size: 9px; line-height: 1.8; margin-top: 22px; }
 .controls-dialog { width: min(820px,calc(100vw - 32px)); margin: auto auto 18px; padding: 22px 28px; }
 .sheet-handle { width: 36px; height: 3px; background: var(--line-strong); border-radius: 3px; margin: -8px auto 16px; }
-.control-layout { display: grid; grid-template-columns: repeat(auto-fit,minmax(110px,1fr)); gap: 8px; }
-button.control-hint { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 11px; min-height: 74px; padding: 13px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--surface-raised); }
-.control-keys { display: flex; gap: 5px; flex-wrap: wrap; }
-.control-keys kbd { color: var(--text); font-size: 11px; min-width: 22px; text-align: center; }
-.control-keys kbd:not(:first-child) { color: var(--muted); }
-.control-description { color: var(--soft); font-size: 10px; }
+.control-layout { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: 8px; }
+.control-hint, button.control-hint { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; min-height: 44px; padding: 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface-raised); }
+.control-keys { display: flex; align-items: center; gap: 4px; }
+.control-keys kbd { color: var(--text); font-size: 11px; min-width: 22px; text-align: center; white-space: nowrap; }
+.control-keys kbd:not(:first-child), .control-key-separator { color: var(--muted); }
+.control-key-separator { font-size: 10px; }
+.control-description { color: var(--soft); font-size: 10px; white-space: nowrap; }
 .runtime-hints { display: flex; flex-wrap: wrap; gap: 14px 22px; margin-top: 24px; color: var(--muted); font-size: 10px; }
 .runtime-hints > span { display: flex; align-items: center; gap: 8px; }
 .runtime-hints kbd, .restart-hint kbd { font-size: 9px; }
@@ -201,7 +203,7 @@ button.rail-auto { display: flex; align-items: center; justify-content: space-be
 .focus-mode.controls-visible .focus-hint, .focus-mode .focus-hint:focus-within { opacity: 1; pointer-events: auto; }
 @media (hover:hover) {
   .quiet-button:hover, .icon-button:hover, .rail-runtime button:hover { color: var(--accent); background: var(--hover); }
-  .game-switcher:hover, .game-card:hover, .control-hint:hover { border-color: var(--line-accent); background: var(--hover); }
+  .game-switcher:hover, .game-card:hover, button.control-hint:hover { border-color: var(--line-accent); background: var(--hover); }
   .primary-button:hover { filter: brightness(1.08); }
   .speed-control button:hover { color: var(--accent); }
 }
@@ -247,7 +249,7 @@ button.rail-auto { display: flex; align-items: center; justify-content: space-be
   .library-meta > span:last-child { max-width: 155px; text-align: right; }
   .controls-dialog { width: 100%; margin: auto 0 0; padding-bottom: max(16px,env(safe-area-inset-bottom)); border-radius: 12px 12px 0 0; }
   .control-layout { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .control-hint { min-height: 65px; }
+  .control-hint { min-height: 44px; }
   .runtime-hints { font-size: 9px; gap: 12px 18px; }
   .focus-mode .workspace { grid-template-columns: minmax(0,1fr) 140px; gap: 12px; padding: 12px 12px max(12px,env(safe-area-inset-bottom)); }
   .focus-mode .focus-hint { gap: 5px; }
