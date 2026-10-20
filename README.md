@@ -1,5 +1,7 @@
 # 0-player
 
+[Play in your browser](https://sunduckcow.github.io/0-player/)
+
 A small arcade with a mind of its own. Snake and Tetris play themselves; take over whenever you like. Built for a browser tab, a television, or a quiet second screen.
 
 The engine and games use TypeScript + Canvas 2D. The settings interface uses shadcn/ui, React and Base UI; icons come from Lucide. No external runtime assets, API keys or server are required.
