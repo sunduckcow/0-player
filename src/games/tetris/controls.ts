@@ -1,0 +1,46 @@
+import type { Action, GameControl } from "@/engine/sdk";
+export default [
+  {
+    action: "up",
+    role: "rotate",
+    keys: ["ArrowUp", "k", "x"],
+    label: "Rotate",
+    symbol: "↻",
+    shortLabel: "Rotate",
+  },
+  {
+    action: "left",
+    role: "move-left",
+    repeat: true,
+    keys: ["ArrowLeft", "h"],
+    label: "Move left",
+    group: "Move",
+    symbol: "←",
+  },
+  {
+    action: "down",
+    role: "move-down",
+    repeat: true,
+    keys: ["ArrowDown", "j"],
+    label: "Soft drop",
+    symbol: "↓",
+    shortLabel: "Down",
+  },
+  {
+    action: "right",
+    role: "move-right",
+    repeat: true,
+    keys: ["ArrowRight", "l"],
+    label: "Move right",
+    group: "Move",
+    symbol: "→",
+  },
+  {
+    action: "primary",
+    role: "primary",
+    keys: ["Enter"],
+    label: "Hard drop",
+    symbol: "⇓",
+    shortLabel: "Drop",
+  },
+] satisfies readonly GameControl<Action>[];

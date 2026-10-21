@@ -1,0 +1,167 @@
+/* Fullscreen reserves the information column, so manual hints never move the game. */
+body.focus-mode {
+  --header-height: 0px;
+  --dock-height: 0px;
+}
+.focus-mode .topbar,
+.focus-mode .transport,
+.focus-mode .controls-rail,
+.focus-mode .stage-bar {
+  display: none;
+}
+.focus-mode .app {
+  padding: 0;
+  max-width: none;
+}
+.focus-mode .workspace {
+  grid-row: 2;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 24px;
+  padding: max(16px, env(safe-area-inset-top))
+    max(28px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+    max(28px, env(safe-area-inset-left));
+}
+.focus-mode .play-area {
+  grid-template-rows: minmax(0, 1fr);
+}
+.focus-mode .screen {
+  border-color: transparent;
+  background: transparent;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0;
+}
+.focus-mode .screen-top,
+.focus-mode .screen-bottom {
+  display: none;
+}
+.focus-mode .game-info {
+  display: flex;
+  padding-top: 12px;
+  overflow: hidden;
+}
+.focus-mode .game-info > * {
+  flex-shrink: 0;
+}
+.focus-mode .game-info > .eyebrow,
+.focus-mode .best-row,
+.focus-mode .pilot-panel,
+.focus-mode .aside-note {
+  display: none;
+}
+.focus-mode .score-panel {
+  margin-top: 0;
+}
+.focus-mode .metrics {
+  margin: 20px 0 26px;
+}
+.focus-mode .focus-controls-rail {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  visibility: hidden;
+}
+.focus-mode.is-human .focus-controls-rail {
+  visibility: visible;
+}
+.focus-mode .focus-controls-rail .rail-title {
+  margin-bottom: 12px;
+}
+.focus-mode .focus-controls-rail .control-hint {
+  min-height: 40px;
+  padding: 6px;
+}
+.focus-mode .focus-controls-rail .rail-auto,
+.focus-mode .focus-controls-rail .rail-note {
+  display: none;
+}
+button.rail-auto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 8px;
+  color: var(--accent);
+  border: 1px solid var(--line-accent);
+  border-radius: 4px;
+  font-size: 10px;
+}
+.focus-mode .focus-hint {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+.focus-mode #focus-auto {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  color: var(--accent);
+}
+.focus-hint button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface-raised);
+  color: var(--soft);
+  font-size: 10px;
+}
+.focus-mode.controls-visible .focus-hint,
+.focus-mode .focus-hint:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: hover) {
+  .quiet-button:hover,
+  .icon-button:hover,
+  .rail-runtime button:hover {
+    color: var(--accent);
+    background: var(--hover);
+  }
+  .game-switcher:hover,
+  .game-card:hover,
+  button.control-hint:hover {
+    border-color: var(--line-accent);
+    background: var(--hover);
+  }
+  .primary-button:hover {
+    filter: brightness(1.08);
+  }
+  .speed-control button:hover {
+    color: var(--accent);
+  }
+}
+@media (max-width: 1200px) {
+  .tagline,
+  .version {
+    display: none;
+  }
+  .workspace {
+    grid-template-columns: 152px minmax(0, 1fr) 180px;
+    gap: 20px;
+  }
+}
+@media (max-width: 1000px) {
+  .controls-rail {
+    display: none;
+  }
+  #controls-button {
+    display: inline-grid;
+  }
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) 180px;
+  }
+}

@@ -1,55 +1,65 @@
-import type { Game } from "@/engine/types";
-import { createSnake, updateSnake, type SnakeState } from "./game";
-import { explorerAI, snakeAI } from "./ai";
-import { renderSnake } from "./render";
-import { normalizeSnakeOptions, type SnakeOptions } from "./settings";
-import { canContinue } from "@/games/recovery";
+import { canContinue } from "@/engine/sdk";
+import type { GameDefinition, Action } from "@/engine/sdk";
+import type { SnakeState, SnakeOptions } from "@/games/snake/types";
+import defaultState from "@/games/snake/state";
+import logic from "@/games/snake/logic";
+import autopilot from "@/games/snake/ai";
+import rendering from "@/games/snake/render";
+import settings from "@/games/snake/settings";
+import persistence from "@/games/snake/persistence";
+import controls from "@/games/snake/controls";
 
-export function createSnakeGame(
-  options: Partial<SnakeOptions> = {},
-): Game<SnakeState> {
-  const settings = normalizeSnakeOptions(options);
-  const ai = settings.ai === "explorer" ? explorerAI : snakeAI;
-  return {
+const strategies = {
+  explorer: {
+    choose: autopilot.explorer,
+    description:
+      "Chases food along short routes, checks each escape, and opens safe paths when space gets tight.",
+  },
+  safe: {
+    choose: autopilot.safe,
+    description:
+      "Follows a safe board-wide cycle, taking shortcuts to food. Replans after human play.",
+  },
+};
+
+export default {
+  metadata: {
     id: "snake",
     title: "Snake",
     description: "Eat, grow, and leave room for the next turn.",
-    strategy:
-      settings.ai === "explorer"
-        ? "Chases food along short routes, checks each escape, and opens safe paths when space gets tight."
-        : "Follows a safe board-wide cycle, taking shortcuts to food. Replans after human play.",
-    controls: [
-      { action: "up", keys: ["ArrowUp", "k"], label: "Move up", group: "Move", touch: "↑" },
-      { action: "left", keys: ["ArrowLeft", "h"], label: "Move left", group: "Move", touch: "←" },
-      { action: "down", keys: ["ArrowDown", "j"], label: "Move down", group: "Move", touch: "↓" },
-      { action: "right", keys: ["ArrowRight", "l"], label: "Move right", group: "Move", touch: "→" },
-    ],
-    width: settings.columns * 20,
-    height: settings.rows * 20,
-    tickMs: 85,
-    create: (seed) => createSnake(seed, settings),
-    update: updateSnake,
-    ai,
-    recovery: {
-      steps: 8,
-      durationMs: 640,
-      isLoss: (state) => state.over && !state.won,
-      canResume: (state) => canContinue(state, ai, updateSnake, 16, (next) => next.won),
-    },
-    render: (ctx, state, frame) => renderSnake(ctx, state, frame, settings.skin),
-    metrics: (state) => [
-      { label: "Length", value: state.body.length },
-      {
-        label: "Board",
-        value: `${Math.round((state.body.length / (state.columns * state.rows)) * 100)}%`,
+    icon: "snake",
+  },
+  defaultState,
+  settings,
+  persistence,
+  initialize: logic.initialize,
+  configure(options) {
+    const { choose: ai, description: strategy } = strategies[options.ai];
+    return {
+      strategy,
+      controls,
+      width: options.columns * rendering.cellSize,
+      height: options.rows * rendering.cellSize,
+      tickMs: 85,
+      boardLabel: `SNAKE / ${options.columns} × ${options.rows}`,
+      update: logic.update,
+      ai,
+      recovery: {
+        steps: 8,
+        durationMs: 640,
+        isLoss: (state) => state.over && !state.won,
+        canResume: (state) =>
+          canContinue(state, ai, logic.update, 16, (next) => next.won),
       },
-    ],
-  };
-}
-
-export const snake = createSnakeGame();
-
-export { createSnake, updateSnake, isSnakeState } from "./game";
-export type { SnakeState };
-export { normalizeSnakeOptions, SNAKE_PRESETS } from "./settings";
-export type { SnakeOptions, SnakeStrategy } from "./settings";
+      render: (ctx, state, frame) =>
+        rendering.draw(ctx, state, frame, options.skin),
+      metrics: (state) => [
+        { label: "Length", value: state.body.length },
+        {
+          label: "Board",
+          value: `${Math.round((state.body.length / (state.columns * state.rows)) * 100)}%`,
+        },
+      ],
+    };
+  },
+} satisfies GameDefinition<SnakeState, SnakeOptions, Action>;

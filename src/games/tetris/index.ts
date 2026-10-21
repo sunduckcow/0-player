@@ -1,62 +1,50 @@
-import type { Game } from "@/engine/types";
-import { ai } from "@/games/tetris/ai";
-import { create, update, type TetrisState } from "@/games/tetris/game";
-import { render, viewport } from "@/games/tetris/render";
-import { canContinue } from "@/games/recovery";
-import { normalizeTetrisOptions, type TetrisOptions } from "./settings";
+import { canContinue } from "@/engine/sdk";
+import type { GameDefinition, Action } from "@/engine/sdk";
+import type { TetrisState, TetrisOptions } from "@/games/tetris/types";
+import defaultState from "@/games/tetris/state";
+import logic from "@/games/tetris/logic";
+import autopilot from "@/games/tetris/ai";
+import rendering from "@/games/tetris/render";
+import settings from "@/games/tetris/settings";
+import persistence from "@/games/tetris/persistence";
+import controls from "@/games/tetris/controls";
 
-export function createTetrisGame(options: Partial<TetrisOptions> = {}): Game<TetrisState> {
-  const settings = normalizeTetrisOptions(options);
-  return {
-  id: "tetris",
-  title: "Tetris",
-  description: "Seven shapes. Keep the stack low and the rows complete.",
-  strategy:
-    "Plans a landing, turns early, then moves into place and speeds up the fall.",
-  controls: [
-    { action: "up", keys: ["ArrowUp", "k", "x"], label: "Rotate", touch: "↑" },
-    {
-      action: "left",
-      keys: ["ArrowLeft", "h"],
-      label: "Move left",
-      group: "Move",
-      touch: "←",
-    },
-    {
-      action: "down",
-      keys: ["ArrowDown", "j"],
-      label: "Soft drop",
-      touch: "↓",
-    },
-    {
-      action: "right",
-      keys: ["ArrowRight", "l"],
-      label: "Move right",
-      group: "Move",
-      touch: "→",
-    },
-    { action: "primary", keys: ["Enter"], label: "Hard drop", touch: "Drop" },
-  ],
-  ...viewport,
-  tickMs: 80,
-  labels: settings.showNext ? [{ text: "Next", x: 276, y: 29, size: 12 }] : [],
-  create,
-  update,
-  ai,
-  recovery: {
-    steps: 24,
-    durationMs: 720,
-    canResume: (state) => canContinue(state, ai, update, 48),
+export default {
+  metadata: {
+    id: "tetris",
+    title: "Tetris",
+    description: "Seven shapes. Keep the stack low and the rows complete.",
+    icon: "blocks",
   },
-  render: (ctx, state, frame) => render(ctx, state, frame, settings),
-  metrics: (state) => [
-    { label: "Lines", value: state.lines },
-    { label: "Level", value: state.level },
-    { label: "Pieces", value: state.pieces },
-  ],
-  };
-}
-
-export const tetris = createTetrisGame();
-
-export type { TetrisState } from "@/games/tetris/game";
+  defaultState,
+  settings,
+  persistence,
+  initialize: logic.initialize,
+  configure(options) {
+    return {
+      strategy:
+        "Plans a landing, turns early, then moves into place and speeds up the fall.",
+      controls,
+      ...rendering.viewport,
+      tickMs: 80,
+      boardLabel: "TETRIS / 10 × 20",
+      labels: options.showNext
+        ? [{ text: "Next", x: 276, y: 29, role: "body" }]
+        : [],
+      update: logic.update,
+      ai: autopilot.choose,
+      recovery: {
+        steps: 24,
+        durationMs: 720,
+        canResume: (state) =>
+          canContinue(state, autopilot.choose, logic.update, 48),
+      },
+      render: (ctx, state, frame) => rendering.draw(ctx, state, frame, options),
+      metrics: (state) => [
+        { label: "Lines", value: state.lines },
+        { label: "Level", value: state.level },
+        { label: "Pieces", value: state.pieces },
+      ],
+    };
+  },
+} satisfies GameDefinition<TetrisState, TetrisOptions, Action>;

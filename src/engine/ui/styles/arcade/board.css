@@ -1,0 +1,125 @@
+.workspace {
+  display: grid;
+  grid-template-columns: 174px minmax(0, 1fr) 204px;
+  gap: 24px;
+  min-height: 0;
+  min-width: 0;
+  padding: 18px 0;
+}
+.play-area {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+}
+.stage-bar {
+  display: none;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.stage-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+.screen {
+  display: grid;
+  grid-template-rows: 28px minmax(0, 1fr) 28px;
+  background: var(--board-bg);
+  border: 1px solid var(--line-strong);
+  padding: 0 14px;
+  max-width: 100%;
+  max-height: 100%;
+}
+.screen-top,
+.screen-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.screen-top > span:first-child,
+.screen-bottom > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+}
+.live-dot,
+.footer-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.board-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: var(--board-muted);
+}
+.board-labels > span {
+  position: absolute;
+  line-height: 1;
+  white-space: nowrap;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+canvas:focus,
+canvas:focus-visible {
+  outline: none;
+}
+.board-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 15px;
+  padding: 16px;
+  background: var(--overlay);
+  backdrop-filter: blur(3px);
+  text-align: center;
+}
+.board-overlay p {
+  font-family: inherit;
+  font-size: clamp(20px, 3vw, 32px);
+  letter-spacing: -0.8px;
+}
+.board-overlay > span {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.board-overlay .primary-button {
+  width: auto;
+  padding: 0 24px;
+}

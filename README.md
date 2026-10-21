@@ -13,7 +13,9 @@ bun install
 bun run dev
 ```
 
-Open the local address printed by Vite. `bun run check` runs lint, TypeScript and Vitest; `bun run build` produces **one self-contained `dist/index.html`** (roughly 550 KB, or 171 KB gzip). Open it directly offline, send it to someone, or upload it to any static host. `bun run preview` serves the production build locally.
+Open the local address printed by Vite. `bun run check` runs Prettier verification, lint, TypeScript and Vitest; `bun run build` produces **one self-contained `dist/index.html`** (roughly 550 KB, or 171 KB gzip). Open it directly offline, send it to someone, or upload it to any static host. `bun run preview` serves the production build locally.
+
+Use `bun run format` to apply Prettier or `bun run format:check` to check it. Generated shadcn components in `src/engine/ui/primitives`, dependencies and build outputs are excluded; `bun.lock` remains managed by Bun. The CI uses the same formatting check through `bun run check`.
 
 For GitHub Pages, publish the contents of `dist/` as the site's root or a repository subdirectory. All code, styles and the favicon are inline, so no base-path configuration is needed. Nothing is published by the build command.
 
@@ -67,7 +69,7 @@ Browser speed changes and returning to autopilot ease in and out over 350 ms, pr
 
 The **Restart** button, R, a manual retry and automatic new rounds all choose a new seed. Round seeds are mixed to avoid the similar first draws of neighboring LCG seeds. The URL fragment stores the selected game and current seed, for example `#game=tetris&seed=42`. An explicit seed opens its matching saved session when available; otherwise it starts that setup. The same seed, settings, actions and control-ownership sequence produce the same state. Engine callers can replay a setup with `session.restart(seed)`. This is not an input recording system.
 
-After a loss, Snake pulses red and Tetris pulses amber, then visibly replay recent states backwards: Snake walks back along its path and Tetris pieces climb back through earlier rows. The whole presentation takes 640 ms for Snake and 720 ms for Tetris. The AI then continues from a viable earlier position with its remembered speed. Snake rewinds about eight steps; Tetris about 24. Seed and round stay unchanged; score and random state rewind with the board. If there is no viable history or two rescues have already failed, a fresh AI round starts instead. A new manual takeover renews the rescue budget. R or **Restart** always cancels recovery and starts a fresh board. Games without recovery keep the usual manual retry / automatic restart behavior. Enabling AI on a live board never resets it. Space consistently toggles pause even when a toolbar button has keyboard focus. Inside native dialogs, Space and Enter activate the focused button; search fields keep normal text entry.
+After a loss, both games pulse with the engine's recovery colors (red tones adjusted for the current theme), then visibly replay recent states backwards: Snake walks back along its path and Tetris pieces climb back through earlier rows. The whole presentation takes 640 ms for Snake and 720 ms for Tetris. The AI then continues from a viable earlier position with its remembered speed. Snake rewinds about eight steps; Tetris about 24. Seed and round stay unchanged; score and random state rewind with the board. If there is no viable history or two rescues have already failed, a fresh AI round starts instead. A new manual takeover renews the rescue budget. R or **Restart** always cancels recovery and starts a fresh board. Games without recovery keep the usual manual retry / automatic restart behavior. Enabling AI on a live board never resets it. Space consistently toggles pause even when a toolbar button has keyboard focus. Inside native dialogs, Space and Enter activate the focused button; search fields keep normal text entry.
 
 ## Game workspace
 
@@ -88,70 +90,48 @@ Explorer hunts food while leaving room around the moving tail. For the final ten
 
 ## Architecture
 
+The filesystem map and dependency rules are in [docs/architecture.md](docs/architecture.md). The public cartridge contract is [engine/sdk.ts](src/engine/sdk.ts); the full authoring guide is [docs/engine-sdk.md](docs/engine-sdk.md).
+
 ```text
-src/
-  engine/
-    types.ts       game contract and six shared actions
-    session.ts     fixed-step clock, ownership, queue, rewind, restart
-    feedback.ts    motion-aware recovery pulse
-    input.ts       keyboard → actions and runtime commands
-    random.ts      seeded random number generation
-    draw.ts        tiny shared drawing helpers / palette
-  games/
-    snake/         game.ts · ai.ts · render.ts · index.ts · tests
-    tetris/        game.ts · ai.ts · render.ts · index.ts · tests
-  catalog.ts       typed game registration
-  main.ts          browser lifecycle and game workspace
-  storage.ts       validated session snapshots and preferences
-  panels.ts        native dialogs and pause restoration
-  game-library.ts  catalog search and game cards
-  library-navigation.ts keyboard selection in the game grid
-  control-layout.ts per-game keycaps and touch buttons
-  settings-ui.tsx  General and per-game settings; isolated React root
-  appearance.ts   validated theme/accent preferences and shared palette
-  board-labels.ts sharp HTML labels in logical board coordinates
-  components/ui/   shadcn component source installed by CLI
-  icons.ts         selected Lucide icons
-  index.css        interface styling
-  ui.css           settings utilities and semantic color mapping
+src/main.ts                 Vite entrypoint only
+src/app/                    workspace composition and game registration
+src/engine/
+  sdk.ts                    stable public cartridge API
+  contracts/                type-only game/settings/codec/visual contracts
+  runtime/                  engine instances, state cloning, session and recovery
+  input/                    commands, bindings and keyboard adapter
+  rendering/                Canvas helpers and feedback
+  theme/                    pure appearance resolver and local color math
+  platform/                 browser persistence and DOM theme adapter
+  ui/                       controls, library, settings, board HUD, primitives/styles
+  lib/                      pure low-level PRNG
+src/games/<id>/             index default cartridge + private rules/AI/render/settings
+src/**/__tests__/          tests next to the module they cover
+src/tests/architecture/     dependency/import/cycle guards
+src/tests/integration/      scenarios involving engine and real games
 ```
 
-Rules are pure `update(state, action, mode?)` functions. The optional ownership mode lets a game tune natural pacing while preserving input responsiveness; direct simulations default to autopilot. Random state travels with the board. Renderers read state. AI only returns an action; it cannot move pieces or grant itself abilities outside the rules. The session owns timing, speed, pause and human/AI control. One action is consumed per tick; the human queue is bounded. The browser uses `advanceFrame` to run at most one normal update per frame, preserving fractional time and dropping overdue whole ticks. Recovery and completion timers keep real elapsed time. Direct `advance` calls still support up to eight ticks for simulations. Hidden tabs suspend simulation without catch-up bursts.
+Each `games/<id>/index.ts` exports a plain definition object as `default`, checked with `satisfies GameDefinition<State, Settings, Action>`. Registration is only `import snake from "@/games/snake"` and `catalog = [snake, tetris]`. The engine creates isolated runtime instances from that catalog; games do not instantiate themselves. `defaultState` supplies the zero-state shape and values, with optional pure seeded `initialize`. The engine deep-clones the template for each new game and owns all live state/settings/history.
 
-The core contract is `Game<S extends GameState>` in `src/engine/types.ts`. Implement `create(seed)`, `update(state, action)`, `ai(state)`, `render(ctx, state, frame)` and `metrics(state)`, provide metadata and dimensions, then register the cartridge in `src/catalog.ts`. It appears in the searchable library automatically. The simulation is independent of React and the interface. For saved sessions, add validation of the cartridge's state to `src/storage.ts`.
+Game entries visibly compose one default object per local module: `logic`, `ai`, `render`, `settings`, `persistence`, `controls` and the zero-state template. Types live in `types.ts`; geometry and larger searches have their own modules. Small callbacks stay inline in `index.ts`, and private helpers stay with their algorithm. Snake's static skin preview uses only drawing coordinates, never a fabricated gameplay state. The [filesystem guide](docs/architecture.md) lists each responsibility.
 
-For new cartridges, use the project skill [`$create-zero-player-game`](.agents/skills/create-zero-player-game/SKILL.md). It includes the full [engine API](.agents/skills/create-zero-player-game/references/engine-api.md), integration steps, persistence requirements, current limitations and a verification checklist.
+A game declares callbacks, semantic actions, settings and its own state codec. It does not import the host, CSS, React, storage or theme internals. Adding a cartridge changes only its own modules and the registration list. The engine supplies time, ownership, immutable visuals and motion preferences; pause, autopilot, restart and speed always remain in the same global panel. The 2×3 game pad contains only game actions, leaving unused positions empty.
 
-Each game configures its own control layout. The same configuration drives real keybindings, visible clickable key hints and touch buttons:
+The same action configuration drives keyboard bindings, repeated input, key hints and touch controls. Action IDs may be a cartridge-specific string union; keys reserved by the engine and duplicate roles/bindings are rejected. Enter restarts a terminal game through an engine command, never by treating a gameplay action as restart.
 
-```ts
-controls: [
-  { action: "left", keys: ["ArrowLeft", "h"], label: "Move left", touch: "←" },
-  { action: "up", keys: ["ArrowUp", "x"], label: "Rotate", touch: "↑" },
-  { action: "primary", keys: ["Enter"], label: "Hard drop", touch: "Drop" },
-];
-```
+Settings are declarative boolean/choice/number fields and preset patches. The engine renders and validates a draft and applies its declared effect. Presentation-only changes preserve the exact Session, RNG and rewind history; compatible rule changes preserve the complete stable snapshot and replace obsolete history. Codecs validate each game's data, while storage handles v1/v2 envelopes without importing a game.
 
-`action` is a shared game action, `keys` contains keyboard aliases, `label` describes it and optional `touch` supplies a short touch-button label. Omit `touch` for keyboard-only controls. Arcade commands (A, Space / P, R, F, G, / and ?) are reserved globally; Enter also restarts a lost manual game. Switching games replaces the current key layout rather than accumulating bindings.
+Rules remain pure fixed-step `update(state, action, mode?)` functions; AI selects the same actions a person uses. The engine owns one browser loop, shared ½×/1×/2×/4× speed, bounded input and recovery history. Games draw geometry using `frame.visuals`: accent/accentMuted/secondary, seven stable categorical slots and engine feedback tokens. No renderer defines theme RGBs or reads browser preferences. Board labels remain sharp engine-styled text.
 
-Games opt into loss recovery with a small optional contract:
+For new cartridges, use [`$create-zero-player-game`](.agents/skills/create-zero-player-game/SKILL.md). Architecture tests guard this boundary; a test-only third cartridge proves custom actions/settings/state can be registered without shell changes. The production collection still contains only Snake and Tetris.
 
-```ts
-recovery: {
-  steps: 8,
-  durationMs: 640,
-  isLoss: state => state.over && !state.won,
-  canResume: state => canContinue(state, ai, update, 16),
-},
-```
+Snake defaults to Explorer: it pursues food at every board density while checking escape routes. When the body blocks a direct path, it expands head-to-tail routes through empty pairs of cells or searches ahead through cells that the moving tail will release. The bounded search distinguishes different body shapes and validates the entire route and an escape after eating; it stays deterministic without a mutable AI cache. During cycle fallback, Explorer slightly favors moves that leave visible space before the tail when safe. Safer fallback paths remain available when no viable food route is found. Safe loop follows a Hamiltonian cycle with safe shortcuts. Both strategies use the same rules and support custom board dimensions. An already trapped human position may remain unsalvageable. Tetris searches reachable placements through the same timed actions a person uses and evaluates line clears, holes, stack height and roughness. Its AI pauses briefly to plan, turns early, spaces out sideways moves and accelerates the fall one step at a time. Hard drop remains a player action. Manual gravity starts at one cell per 880 ms and accelerates with level to a 320 ms floor, so a high-level AI board stays playable on takeover. AI gravity and the shared 80 ms input tick are unchanged. Completed rows briefly flash for 120 ms before disappearing, without delaying input or simulation; reduced-motion preferences disable the flash. Seeded per-piece preferences add variety among promising placements without changing the player’s rules. All seven tetrominoes map to stable engine palette slots, shared by active piece, stack, ghost and preview. It uses simple horizontal wall kicks and clockwise rotation; hold and lock delay are intentionally outside this first version.
 
-`steps` sets the preferred rollback distance. Optional `isLoss` distinguishes a loss from a victory; optional `canResume` rejects doomed candidates. `games/recovery.ts` provides a pure look-ahead helper using normal AI actions. The session retains at most four rollback windows (capped at 240 immutable states), tries a bounded number of older candidates, clears queued human input, and takes AI ownership. `frame.recovery` exposes `progress` (0–1) and actual `steps` to the renderer; each game chooses its own visual response. The short presentation phase holds the loss for its first fifth, then plays actual history backwards step by step. It uses real time at every speed and pauses with the session. Reduced motion uses a steady tint and a final jump instead of reverse movement. History stays in memory; saves during recovery contain the live destination rather than the discarded losing state.
-
-Snake defaults to Explorer: it pursues food at every board density while checking escape routes. When the body blocks a direct path, it expands head-to-tail routes through empty pairs of cells or searches ahead through cells that the moving tail will release. The bounded search distinguishes different body shapes and validates the entire route and an escape after eating; it stays deterministic without a mutable AI cache. During cycle fallback, Explorer slightly favors moves that leave visible space before the tail when safe. Safer fallback paths remain available when no viable food route is found. Safe loop follows a Hamiltonian cycle with safe shortcuts. Both strategies use the same rules and support custom board dimensions. An already trapped human position may remain unsalvageable. Tetris searches reachable placements through the same timed actions a person uses and evaluates line clears, holes, stack height and roughness. Its AI pauses briefly to plan, turns early, spaces out sideways moves and accelerates the fall one step at a time. Hard drop remains a player action. Manual gravity starts at one cell per 880 ms and accelerates with level to a 320 ms floor, so a high-level AI board stays playable on takeover. AI gravity and the shared 80 ms input tick are unchanged. Completed rows briefly flash for 120 ms before disappearing, without delaying input or simulation; reduced-motion preferences disable the flash. Seeded per-piece preferences add variety among promising placements without changing the player’s rules. All seven tetrominoes have their own neon terminal color, shared by the active piece, stack and preview. It uses simple horizontal wall kicks and clockwise rotation; hold and lock delay are intentionally outside this first version.
-
-The six-action contract is discrete: up, down, left, right, primary, secondary. A future game needing simultaneous movement and firing should extend this to a small input frame, rather than add hidden game-specific controls to the runtime.
+Input is discrete, with cartridge-specific string action IDs. A future game needing simultaneous movement and firing should extend this to a small input frame, rather than add hidden game-specific controls to the runtime.
 
 ## Next cartridges
+
+The full collection of game ideas and autopilot concepts is in [docs/game-ideas.md](docs/game-ideas.md). The next game has not been selected yet.
 
 | Game        | AI                                                          | Why it fits                                    |
 | ----------- | ----------------------------------------------------------- | ---------------------------------------------- |

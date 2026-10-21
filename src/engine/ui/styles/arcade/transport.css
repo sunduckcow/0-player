@@ -1,0 +1,104 @@
+.transport {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+}
+.transport-actions {
+  display: flex;
+  gap: 3px;
+}
+.control-divider {
+  margin: 0 5px;
+}
+button.primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 166px;
+  padding: 0 14px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.primary-button kbd {
+  color: var(--accent-ink);
+  border-color: var(--accent-key-line);
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 400;
+}
+.dock-spacer {
+  flex: 1;
+}
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.speed-label {
+  color: var(--muted);
+  font-size: 10px;
+}
+.speed-options {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-deep);
+}
+.speed-control button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 28px;
+  padding: 0 9px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 3px;
+}
+.speed-control button::before {
+  content: "";
+  position: absolute;
+  inset: -8px 0;
+}
+.speed-control button[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--line-accent);
+  background: var(--selected);
+}
+#speed-select-root {
+  display: none;
+}
+.touch-controls,
+.focus-hint {
+  display: none;
+}
+.is-human .live-label,
+.is-human .on-label {
+  color: var(--text);
+}
+.is-human .pilot-panel {
+  border-color: var(--line-strong);
+}
+.is-human #control-button {
+  background: var(--surface-raised);
+  color: var(--accent);
+}
+.is-human #control-key {
+  color: var(--accent);
+}

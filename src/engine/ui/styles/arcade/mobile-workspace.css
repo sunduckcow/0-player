@@ -1,0 +1,88 @@
+/* A single touch layout: controls stay visible, the board never moves on takeover. */
+.mobile-ui {
+  --header-height: calc(60px + env(safe-area-inset-top));
+  --dock-height: calc(64px + env(safe-area-inset-bottom));
+}
+.mobile-ui .app {
+  padding-inline: max(12px, env(safe-area-inset-left))
+    max(12px, env(safe-area-inset-right));
+}
+.mobile-ui .topbar {
+  gap: 10px;
+}
+.mobile-ui .wordmark {
+  min-width: 44px;
+  justify-content: center;
+}
+.mobile-ui .wordmark-name,
+.mobile-ui .wordmark-dash,
+.mobile-ui .header-divider,
+.mobile-ui .version,
+.mobile-ui .tagline,
+.mobile-ui .topbar kbd,
+.mobile-ui #controls-button,
+.mobile-ui #focus-button,
+.mobile-ui .controls-rail,
+.mobile-ui .game-info {
+  display: none;
+}
+.mobile-ui button.game-switcher {
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  padding-inline: 12px;
+  font-size: 16px;
+}
+.mobile-ui #game-picker-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mobile-ui .game-switcher > [data-icon="chevron"] {
+  margin-left: auto;
+}
+.mobile-ui .header-actions {
+  flex: none;
+  gap: 0;
+}
+.mobile-ui .workspace {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 8px 0;
+}
+.mobile-ui .play-area {
+  grid-template-rows: 40px minmax(0, 1fr) 120px;
+}
+.mobile-ui .stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.mobile-ui .compact-stats {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px 12px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+}
+.mobile-ui .compact-stats strong {
+  color: var(--accent);
+  margin-left: 4px;
+  font-size: 15px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.mobile-ui .compact-stats small {
+  grid-column: 1 / -1;
+  font-size: 9px;
+}
+.mobile-ui .screen {
+  padding-inline: 8px;
+  grid-template-rows: 24px minmax(0, 1fr) 24px;
+}
+.mobile-ui .screen-top,
+.mobile-ui .screen-bottom {
+  font-size: 7px;
+  gap: 6px;
+}

@@ -2,15 +2,15 @@
 
 Preserve the existing terminal palette, neon game colors, local typography and small-engine architecture. Change interaction and composition.
 
-| Problem | Priority | Change |
-| --- | --- | --- |
-| Description pushes the board and controls below the viewport | High | A viewport-sized game workspace; no document scroll |
-| Horizontal game tabs grow with the entire catalog | High | Searchable game library in a keyboard-accessible native dialog |
-| Control hints require leaving the board | High | Visible game-configured hints beside the board, plus an on-demand sheet |
-| Idle chrome changes shift the whole layout | High | Fixed header and dock heights; no timed geometry changes |
-| Permanent chrome competes with screensaver playback | Medium | Explicit focus mode with game, score and selected metrics |
-| Opening a menu can lose a manual game behind it | High | Panels pause the session and restore its earlier pause state |
-| Switching games discards progress | High | Per-game session snapshots, restored on selection and reload |
+| Problem                                                      | Priority | Change                                                                  |
+| ------------------------------------------------------------ | -------- | ----------------------------------------------------------------------- |
+| Description pushes the board and controls below the viewport | High     | A viewport-sized game workspace; no document scroll                     |
+| Horizontal game tabs grow with the entire catalog            | High     | Searchable game library in a keyboard-accessible native dialog          |
+| Control hints require leaving the board                      | High     | Visible game-configured hints beside the board, plus an on-demand sheet |
+| Idle chrome changes shift the whole layout                   | High     | Fixed header and dock heights; no timed geometry changes                |
+| Permanent chrome competes with screensaver playback          | Medium   | Explicit focus mode with game, score and selected metrics               |
+| Opening a menu can lose a manual game behind it              | High     | Panels pause the session and restore its earlier pause state            |
+| Switching games discards progress                            | High     | Per-game session snapshots, restored on selection and reload            |
 
 The normal desktop workspace shows controls on the left, an adaptive center stage, score and details on the right, and a fixed action dock. Header height stays constant during idle playback. The board fits the remaining viewport and uses its cartridge's aspect ratio. Space for manual hints is reserved, so AI/manual handoff does not change board geometry. Native dialogs can scroll internally when needed; the game page does not scroll.
 
@@ -28,6 +28,14 @@ Snake settings use shadcn/ui controls and Lucide icons, preserving the existing 
 
 Each game saves its state, mode, pause, speed, seed and round to local storage roughly once a second, before a switch and on page hide. Selecting another game restores its own snapshot. Reloading also resumes a valid saved session. If browser storage is blocked, an in-memory cache still preserves games while switching within the current page. Restart remains an explicit action. Corrupt or incompatible saves are ignored.
 
-The engine, game rules, renderer and AI remain plain TypeScript/Canvas. React, shadcn/ui and Base UI are confined to the settings form. Production still ships as one offline HTML with all runtime code, styles and icons embedded; it is roughly 385 KB uncompressed, or 120 KB gzip.
+The engine, game rules, renderer and AI remain plain TypeScript/Canvas. React, shadcn/ui and Base UI are confined to settings and the compact speed selector. Production still ships as one offline HTML with all runtime code, styles and icons embedded.
 
 Focus controls sit in the information column rather than a bottom dock, leaving the board the full available height. Narrow portrait screens use a compact header row. Tetris AI turns early and soft-drops into place; instant hard drop remains a player action.
+
+## Mobile layouts
+
+A single touch layout applies to narrow screens, coarse pointers and short phone landscape viewports. It uses `viewport-fit=cover`, safe-area insets and a dynamic viewport height. Header and dock targets are at least 44×44px; inputs use 16px type to avoid focus zoom on iPhone.
+
+The header contains the logo, game picker and settings. Focus mode and the keyboard-help sheet are desktop features: mobile ignores `fullscreen=1` while preserving that shareable URL for desktop. Game buttons are always visible. One tap resumes a paused game and takes manual control through the same engine input path; no takeover button is required. Tetris labels rotation, soft drop and hard drop. The 2×3 touch pad places up (rotation in Tetris) above left/down/right; primary/secondary use the top corners. Unused game positions stay empty. A separate fixed dock always holds pause, restart, Autopilot and a shadcn Select for speed in the same positions for every game. Manual play shows 1× and returning to AI restores the saved multiplier. The board rectangle does not change on takeover.
+
+Portrait places the 2×3 game pad below the board. Short landscape places them beside it. The library is a compact bottom sheet with a search field and full-width game rows; opening it does not focus the search or summon the phone keyboard. Settings use the same sheet treatment, General/Game tabs, an internally scrolling body and pinned Apply/Cancel actions. Keyboard instructions are omitted on touch layouts. Panels continue to pause and restore the game, and closing settings without applying preserves saved preferences.

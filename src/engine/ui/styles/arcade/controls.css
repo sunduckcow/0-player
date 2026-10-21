@@ -1,0 +1,111 @@
+.controls-dialog {
+  width: min(820px, calc(100vw - 32px));
+  margin: auto auto 18px;
+  padding: 22px 28px;
+}
+.sheet-handle {
+  width: 36px;
+  height: 3px;
+  background: var(--line-strong);
+  border-radius: 3px;
+  margin: -8px auto 16px;
+}
+.control-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+}
+.control-hint,
+button.control-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-raised);
+}
+.control-keys {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.control-keys kbd {
+  color: var(--text);
+  font-size: 11px;
+  min-width: 22px;
+  text-align: center;
+  white-space: nowrap;
+}
+.control-keys kbd:not(:first-child),
+.control-key-separator {
+  color: var(--muted);
+}
+.control-key-separator {
+  font-size: 10px;
+}
+.control-description {
+  color: var(--soft);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.runtime-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.runtime-hints > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.runtime-hints kbd,
+.restart-hint kbd {
+  font-size: 9px;
+}
+.restart-hint {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.8;
+}
+.sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.settings-dialog {
+  width: min(560px, calc(100vw - 32px));
+}
+#settings-root {
+  padding-top: 24px;
+}
+.sr-only,
+.skip-link:not(:focus) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip-link:focus {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 12px;
+  z-index: 10;
+}

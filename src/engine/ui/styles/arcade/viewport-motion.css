@@ -1,0 +1,99 @@
+@media (max-height: 560px) and (orientation: landscape) {
+  .mobile-ui {
+    --header-height: calc(48px + env(safe-area-inset-top));
+    --dock-height: calc(56px + env(safe-area-inset-bottom));
+  }
+  .mobile-ui .transport {
+    padding-block: 5px calc(6px + env(safe-area-inset-bottom));
+  }
+  .mobile-ui .workspace {
+    padding: 6px 0;
+  }
+  .mobile-ui .play-area {
+    grid-template-columns: minmax(0, 1fr) 192px;
+    grid-template-rows: 24px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  .mobile-ui .stage-bar {
+    grid-column: 1 / -1;
+  }
+  .mobile-ui .compact-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 9px;
+  }
+  .mobile-ui .compact-stats small {
+    display: none;
+  }
+  .mobile-ui .compact-stats strong {
+    font-size: 13px;
+  }
+  .mobile-ui .stage-center {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .mobile-ui .screen {
+    grid-template-rows: minmax(0, 1fr);
+    padding: 0;
+  }
+  .mobile-ui .screen-top,
+  .mobile-ui .screen-bottom {
+    display: none;
+  }
+  .mobile-ui .touch-controls {
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 50px);
+    gap: 6px;
+    align-content: center;
+    padding: 0;
+  }
+  .mobile-ui button.touch-action {
+    width: 100%;
+    max-width: none;
+    height: 48px;
+  }
+  .mobile-ui .touch-symbol {
+    font-size: 20px;
+  }
+  .mobile-ui dialog {
+    max-width: 600px;
+  }
+  .mobile-ui .library-dialog .search-field {
+    margin-top: 12px;
+  }
+  .mobile-ui .library-meta {
+    margin-top: 10px;
+  }
+  .mobile-ui button.game-card {
+    min-height: 64px;
+  }
+}
+@keyframes mobile-panel-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,134 @@
+/* Interface and board tokens share a resolved appearance; the layout stays fixed. */
+:root {
+  --font-interface: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-interface);
+  font-variant-numeric: slashed-zero;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --bg: #141714;
+  --surface: #1d211c;
+  --surface-raised: #20261d;
+  --surface-deep: #141a12;
+  --line: #33392f;
+  --line-strong: #49543f;
+  --text: #e5e8df;
+  --muted: #a3ad9a;
+  --soft: #c9d2bf;
+  --dim: #8d9d7d;
+  --accent: #c6ef83;
+  --accent-ink: #1b2613;
+  --board-bg: #141916;
+  --board-grid: #202921;
+  --board-muted: #9aab8b;
+  --overlay: #111610e3;
+  --backdrop: #0b100bba;
+  --shadow: #0008;
+  --selected: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  --hover: color-mix(in srgb, var(--accent) 13%, var(--surface));
+  --line-accent: color-mix(in srgb, var(--accent) 35%, var(--line));
+  --accent-key-line: color-mix(in srgb, var(--accent-ink) 40%, transparent);
+  --header-height: calc(64px + env(safe-area-inset-top));
+  --dock-height: calc(76px + env(safe-area-inset-bottom));
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f2f4ed;
+  --surface: #f9faf6;
+  --surface-raised: #e9eee3;
+  --surface-deep: #fdfefb;
+  --line: #cad2c2;
+  --line-strong: #a4b294;
+  --text: #20291e;
+  --muted: #57614f;
+  --soft: #384731;
+  --dim: #66765b;
+  --accent-ink: #ffffff;
+  --board-bg: #f7faf2;
+  --board-grid: #d5dfcb;
+  --board-muted: #536448;
+  --overlay: #f2f4ede8;
+  --backdrop: #1b27125c;
+  --shadow: #27321c26;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body {
+  min-width: 280px;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not([data-slot]),
+input:not([data-slot]),
+select:not([data-slot]) {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+button:not([data-slot]) {
+  border: 0;
+  background: none;
+}
+button,
+a,
+input,
+select {
+  outline-offset: -3px;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+[data-icon] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+p,
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+kbd {
+  font: inherit;
+  font-size: 10px;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  padding: 2px 5px;
+  white-space: nowrap;
+}
+[hidden] {
+  display: none !important;
+}

@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#141714" />
     <meta
       name="description"
@@ -41,7 +44,16 @@
         </button>
         <span class="tagline">No players required.</span>
         <div class="header-actions">
-          <button class="icon-button" id="settings-button" aria-label="Settings" title="Settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span data-icon="settings"></span></button>
+          <button
+            class="icon-button"
+            id="settings-button"
+            aria-label="Settings"
+            title="Settings"
+            aria-haspopup="dialog"
+            aria-controls="settings-dialog"
+          >
+            <span data-icon="settings"></span>
+          </button>
           <button
             class="icon-button"
             id="controls-button"
@@ -65,15 +77,14 @@
         <aside class="controls-rail" aria-label="Game controls">
           <p class="rail-title">Your controls</p>
           <div id="inline-controls" class="rail-controls"></div>
-          <div class="rail-runtime" aria-label="Arcade shortcuts">
-            <button data-command="auto"><kbd>A</kbd><span>Autopilot</span></button>
-            <button data-command="pause"><kbd>Space / P</kbd><span>Pause</span></button>
-            <button data-command="restart"><kbd>R</kbd><span>Restart</span></button>
-            <button data-command="focus"><kbd>F</kbd><span>Focus</span></button>
-            <button data-command="games"><kbd>G</kbd><span>Games</span></button>
-            <button data-command="help"><kbd>/</kbd><span>All controls</span></button>
-          </div>
-          <p class="rail-note">English or Russian keyboard.<br />Your game saves as you play.</p>
+          <div
+            class="rail-runtime"
+            id="runtime-controls"
+            aria-label="Arcade shortcuts"
+          ></div>
+          <p class="rail-note">
+            English or Russian keyboard.<br />Your game saves as you play.
+          </p>
         </aside>
         <section class="play-area" aria-label="Game screen">
           <div class="stage-bar">
@@ -132,11 +143,21 @@
             </div>
           </div>
           <div class="metrics" id="metrics"></div>
-          <section class="focus-controls-rail" aria-label="Manual controls" id="focus-controls-rail" inert>
+          <section
+            class="focus-controls-rail"
+            aria-label="Manual controls"
+            id="focus-controls-rail"
+            inert
+          >
             <p class="rail-title">Your controls</p>
             <div id="focus-game-controls" class="rail-controls"></div>
-            <button class="rail-auto" data-command="auto"><kbd>A</kbd> Let AI play</button>
-            <p class="rail-note">AI rescues after a loss<br /><kbd>R</kbd> restart · <kbd>Space</kbd> pause</p>
+            <button class="rail-auto" data-command="auto">
+              <kbd>A</kbd> Let AI play
+            </button>
+            <p class="rail-note">
+              AI rescues after a loss<br /><kbd>R</kbd> restart ·
+              <kbd>Space</kbd> pause
+            </p>
           </section>
           <section class="pilot-panel">
             <div class="pilot-heading">
@@ -146,8 +167,7 @@
             </div>
             <p id="strategy"></p>
             <p class="handoff-note">
-              Arrow keys take over.<br /><kbd>A</kbd> brings
-              AI back.
+              Arrow keys take over.<br /><kbd>A</kbd> brings AI back.
             </p>
           </section>
           <div class="aside-note">
@@ -169,13 +189,30 @@
               title="Controls · ?"
             >
               <span data-icon="keyboard"></span></button
-            ><button id="focus-settings" aria-label="Settings" title="Settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span data-icon="settings"></span></button
+            ><button
+              id="focus-settings"
+              aria-label="Settings"
+              title="Settings"
+              aria-haspopup="dialog"
+              aria-controls="settings-dialog"
+            >
+              <span data-icon="settings"></span></button
             ><button id="focus-auto">
               <span id="focus-control-label">Take control</span
               ><kbd id="focus-control-key" hidden>A</kbd></button
-            ><button id="focus-pause" aria-label="Pause or resume" title="Pause · Space / P">
+            ><button
+              id="focus-pause"
+              aria-label="Pause or resume"
+              title="Pause · Space / P"
+            >
               <span data-icon="pause"></span></button
-            ><button id="focus-exit" aria-label="Exit focus" title="Exit focus · F">Exit <kbd>F</kbd></button>
+            ><button
+              id="focus-exit"
+              aria-label="Exit focus"
+              title="Exit focus · F"
+            >
+              Exit <kbd>F</kbd>
+            </button>
           </nav>
         </aside>
       </main>
@@ -194,7 +231,8 @@
             aria-label="Restart game"
             title="Restart · R"
           >
-            <span data-icon="restart"></span><span class="button-label">Restart</span>
+            <span data-icon="restart"></span
+            ><span class="button-label">Restart</span>
           </button>
         </div>
         <span class="control-divider"></span
@@ -206,17 +244,14 @@
         <div class="dock-spacer"></div>
         <div class="speed-control" role="group" aria-label="Game speed">
           <span class="speed-label">Speed</span
-          ><span class="speed-options"><button data-speed="0.5" aria-pressed="false">½×</button
-          ><button data-speed="1" aria-pressed="true">1×</button
-          ><button data-speed="2" aria-pressed="false">2×</button
-          ><button data-speed="4" aria-pressed="false">4×</button></span>
+          ><span class="speed-options"
+            ><button data-speed="0.5" aria-pressed="false">½×</button
+            ><button data-speed="1" aria-pressed="true">1×</button
+            ><button data-speed="2" aria-pressed="false">2×</button
+            ><button data-speed="4" aria-pressed="false">4×</button></span
+          >
         </div>
-        <select id="speed-select" aria-label="Game speed">
-          <option value="0.5">½×</option>
-          <option value="1" selected>1×</option>
-          <option value="2">2×</option>
-          <option value="4">4×</option>
-        </select>
+        <div id="speed-select-root"></div>
       </footer>
     </div>
     <dialog
@@ -283,12 +318,11 @@
         Press a key, or click an action to jump in.
       </p>
       <div class="control-layout" id="game-controls"></div>
-      <div class="runtime-hints" aria-label="Arcade controls">
-        <span><kbd>A</kbd> Autopilot</span
-        ><span><kbd>Space / P</kbd> Pause</span><span><kbd>R</kbd> Restart</span
-        ><span><kbd>F</kbd> Focus</span><span><kbd>G</kbd> Games</span
-        ><span><kbd>/ / ?</kbd> Controls</span>
-      </div>
+      <div
+        class="runtime-hints"
+        id="runtime-hints"
+        aria-label="Arcade controls"
+      ></div>
       <p class="restart-hint">
         After a loss, rewind and let AI take over. <kbd>R</kbd> starts fresh.
       </p>
@@ -298,8 +332,24 @@
         </button>
       </div>
     </dialog>
-    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-heading">
-      <div class="dialog-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2 id="settings-heading">Settings</h2></div><button class="icon-button" data-close-panel aria-label="Close settings"><span data-icon="close"></span></button></div>
+    <dialog
+      id="settings-dialog"
+      class="settings-dialog"
+      aria-labelledby="settings-heading"
+    >
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">MAKE IT YOURS</p>
+          <h2 id="settings-heading">Settings</h2>
+        </div>
+        <button
+          class="icon-button"
+          data-close-panel
+          aria-label="Close settings"
+        >
+          <span data-icon="close"></span>
+        </button>
+      </div>
       <div id="settings-root"></div>
     </dialog>
     <p class="sr-only" role="status" id="announcement"></p>

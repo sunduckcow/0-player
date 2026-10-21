@@ -1,0 +1,184 @@
+.controls-rail,
+.game-info {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.controls-rail {
+  padding: 6px 0;
+}
+.rail-title,
+.eyebrow {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1.3px;
+  margin-bottom: 18px;
+}
+.rail-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rail-controls .control-hint {
+  min-height: 36px;
+  padding: 6px;
+  gap: 6px;
+}
+.rail-controls .control-keys {
+  gap: 3px;
+}
+.rail-controls .control-keys kbd {
+  font-size: 9px;
+  padding: 2px 3px;
+  min-width: 18px;
+}
+.rail-controls .control-description,
+.rail-controls .control-key-separator {
+  font-size: 9px;
+}
+.rail-runtime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.rail-runtime button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px;
+  font-size: 9px;
+  color: var(--soft);
+  border-radius: 3px;
+}
+.rail-runtime kbd {
+  font-size: 9px;
+}
+.rail-note {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.9;
+}
+.game-info {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 0;
+}
+.score-panel {
+  margin-top: 12px;
+}
+.detail-label {
+  font-size: 10px;
+  color: var(--muted);
+}
+.score {
+  display: block;
+  color: var(--accent);
+  font-size: clamp(36px, 4.3vw, 56px);
+  letter-spacing: -3px;
+  line-height: 1.15;
+  margin: 8px 0 13px;
+  font-variant-numeric: tabular-nums;
+}
+.best-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+}
+#best {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin: 24px 0;
+  padding: 18px 0;
+  gap: 12px;
+}
+.metric span {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 9px;
+}
+.metric strong {
+  font-size: 17px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.pilot-panel {
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  padding: 16px 12px;
+}
+.pilot-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pilot-symbol,
+.on-label {
+  color: var(--accent);
+}
+.pilot-heading h2 {
+  font-size: 9px;
+  font-weight: 400;
+}
+.on-label {
+  font-size: 8px;
+  margin-left: auto;
+}
+#strategy {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.8;
+  margin: 14px 0 16px;
+}
+.handoff-note {
+  font-size: 8px;
+  line-height: 2;
+  color: var(--muted);
+}
+.handoff-note kbd {
+  font-size: 8px;
+  padding: 1px 4px;
+}
+.aside-note {
+  margin-top: auto;
+  padding: 24px 0 4px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 2;
+}
+.footer-dot {
+  width: 4px;
+  height: 4px;
+  color: var(--accent);
+  margin-right: 7px;
+  vertical-align: 2px;
+}
+.aside-hint {
+  display: block;
+  margin-top: 9px;
+}
+.aside-hint kbd {
+  font-size: 8px;
+}
+.aside-hint > span {
+  margin: 0 5px;
+}
+.compact-stats,
+.focus-controls-rail {
+  display: none;
+}
